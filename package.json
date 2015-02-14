@@ -1,0 +1,23 @@
+{
+  "name": "WhiteboardJS",
+  "version": "0.0.1",
+  "author": "Nick Snyder",
+  "private": true,
+  "scripts": {
+    "start": "node ./server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rocnick/whiteboard.git"
+  },
+  "dependencies": {
+    "body-parser": "1.11.0",
+    "request": "2.53.0",
+    "method-override": "2.3.1",
+    "url": "0.10.2",
+    "mysql": "2.5.4",
+    "express-zip": "2.0.0",
+    "debug": "2.1.1",
+    "express": "4.11.2"
+  }
+}
