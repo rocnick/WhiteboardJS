@@ -9,4 +9,4 @@ router.get('/', function(req, res) {
   res.render('index', { title: 'WhiteboardJS' });
 });
 
-module.exports = router;
+module.exports = router; 

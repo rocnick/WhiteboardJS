@@ -1,8 +1,21 @@
+* {
+  font-family: 'Open Sans', sans-serif;
+  margin: 0px;
+  padding: 0px;
+}
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  margin: 75px 50px;
 }
 
-a {
-  color: #00B7FF;
+header {
+  background: #333;
+  color: #FFF;
+  font-size: 35px;
+  font-weight: 600;
+  height: 49px;
+  left: 0px;
+  padding: 8px 25px;
+  position: fixed;
+  top: 0px;
+  width: 100%;
 }
