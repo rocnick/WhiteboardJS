@@ -11,7 +11,23 @@ module.exports = function(grunt)
             expand: true,
             dest: './public/javascripts',
             cwd: './node_modules/angular',
-            src: ['**/*.js', '**/*.map']
+            src: [
+              '**/*.js',
+              '**/*.map'
+            ]
+          }
+        ]
+      },
+      d3: {
+        files: [
+          {
+            expand: true,
+            dest: './public/javascripts',
+            cwd: './node_modules/d3',
+            src: [
+              '**/d3.js',
+              '**/d3.min.js'
+            ]
           }
         ]
       }
@@ -19,9 +35,10 @@ module.exports = function(grunt)
     express: {
       options: {
         port: 1092,
-        spawn: false
+        spawn: false,
+        delay: 200
       },
-      dev: {
+      server: {
         options: {
           script: './bin/www'
         }
@@ -34,7 +51,8 @@ module.exports = function(grunt)
         './bin/*',
         './app.js',
         './routes/*.js',
-        '!./public/javascripts/*angular*.js'
+        '!./public/javascripts/*angular*.js',
+        '!./public/javascripts/*d3*.js'
       ],
       options: { 
         globals: {
@@ -54,9 +72,17 @@ module.exports = function(grunt)
         tasks: ['default'],
         options: {
           spawn: false,
-          event: ['all']
+          event: ['all'],
+          livereload: true
         },
       },
+      gruntfile: {
+        files: 'Gruntfile.js',
+        tasks: ['jshint:gruntfile'],
+        options: {
+          livereload: false
+        }
+      }
     }
   });
 
@@ -65,5 +91,5 @@ module.exports = function(grunt)
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-express-server');
 
-  grunt.registerTask('default', ['jshint', 'copy', 'watch', 'express:dev']);
+  grunt.registerTask('default', ['copy', 'jshint', 'express:server', 'watch']);
 };
