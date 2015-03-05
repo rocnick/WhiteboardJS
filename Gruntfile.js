@@ -1,3 +1,6 @@
+//  Project:    WhiteboardJS
+//  Author:     Nick Snyder
+
 module.exports = function(grunt)
 {
   grunt.initConfig({
@@ -26,9 +29,11 @@ module.exports = function(grunt)
     },
     jshint: {
       files: [
-        'Gruntfile.js',
+        './Gruntfile.js',
         './public/javascripts/*.js',
         './bin/*',
+        './app.js',
+        './routes/*.js',
         '!./public/javascripts/*angular*.js'
       ],
       options: { 
@@ -39,7 +44,13 @@ module.exports = function(grunt)
     },
     watch: {
       scripts: {
-        files: ['./public/javascripts/*.js'],
+        files: [
+          './Gruntfile.js',
+          './public/javascripts/*.js',
+          './app.js',
+          './routes/*.js',
+          './bin/www'
+        ],
         tasks: ['default'],
         options: {
           spawn: false,
@@ -54,5 +65,5 @@ module.exports = function(grunt)
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-express-server');
 
-  grunt.registerTask('default', ['jshint', 'copy', 'express:dev', 'watch']);
+  grunt.registerTask('default', ['jshint', 'copy', 'watch', 'express:dev']);
 };
