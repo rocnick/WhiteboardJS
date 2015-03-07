@@ -2,7 +2,7 @@
 //  Author:    Nick Snyder
 var whiteboard = function() {
   document.getElementsByTagName('body')[0].onload = this.resizeWorkspace;
-  window.onresize = this.resizeWorkspace;
+  //window.onresize = this.resizeWorkspace;
 };
 
 whiteboard.prototype = {
@@ -11,10 +11,13 @@ whiteboard.prototype = {
     var body = document.getElementsByTagName('body')[0];
     var header = document.getElementsByTagName('header')[0];
     var board = document.getElementById('board');
-    var palatte = document.getElementById('palatte');
+    var palette = document.getElementById('palette');
 
-    palatte.style.height = board.style.height = parseInt(body.offsetHeight) - parseInt(header.offsetHeight) + 'px';
-    palatte.style.marginTop = board.style.marginTop = parseInt(header.offsetHeight) + 'px';
+    try {
+      palette.style.height = board.style.height = parseInt(body.offsetHeight) - parseInt(header.offsetHeight) + 'px';
+      palette.style.marginTop = board.style.marginTop = parseInt(header.offsetHeight) + 'px';
+    }
+    catch(Exception) {}
   }
 };
 

@@ -1,15 +1,13 @@
 doctype html
-html(ng-app='whiteboard')
+html
   head
     title= title
     link(rel='stylesheet', href='//fonts.googleapis.com/css?family=Open+Sans')
     link(rel='stylesheet', href='/stylesheets/style.css')
   body
     include header.jade
-
-    block palatte
     
-    block board
+    block content
 
     script(src='javascripts/angular.min.js')
     script(src='javascripts/d3.js')
