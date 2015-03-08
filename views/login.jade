@@ -1,15 +1,12 @@
 extends layout
 
 block content
-  form(id='signup' method='post' action='')
+  form(id='login' method='post' action='')
     div
       label(for='email') Email:
       input(id='email' name='email' type='text')
     div
       label(for='password') Password:
       input(id='password' name='password' type='password')
-    div
-      label(for='password2') Password:
-      input(id='password2' name='password2' type='password')
     div
       input(type='submit')

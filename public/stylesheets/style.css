@@ -24,6 +24,10 @@ header {
   top: 0px;
   width: 100%;
 }
+header>p>a {
+  color: #FFF;
+  text-decoration: none;
+}
 #userPanel {
   position: fixed;
   top: 10px;
@@ -46,18 +50,33 @@ div#board {
   box-shadow: inset 0px 0px 15px -2px rgba(0,0,0,0.5);
 }
 
-form#signup {
+form#signup,
+form#login {
   display: block;
+  width: 300px;
   margin: 200px auto;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
 }
-form#signup>label,
-form#signup>input {
-  display: inline-block;
+form#signup label,
+form#signup input,
+form#login label,
+form#login input {
+  display: block;
 }
-form#signup>input::before {
-  content: "asdfasdf";
+form#signup label,
+form#login label {
+  margin-top: 10px;
+}
+form#signup input,
+form#login input {
+  height: 25px;
+  width: 240px;
+  border-radius: 5px;
+}
+form#signup input:nth-last-child(1),
+form#login input:nth-last-child(1) {
+  margin-bottom: 10px;
 }
 
 /* Palette */

@@ -1,8 +1,7 @@
 //  Project:   Whiteboard JS
 //  Author:    Nick Snyder
 var whiteboard = function() {
-  document.getElementsByTagName('body')[0].onload = this.resizeWorkspace;
-  //window.onresize = this.resizeWorkspace;
+  window.onresize = document.getElementsByTagName('body')[0].onload = this.resizeWorkspace;
 };
 
 whiteboard.prototype = {
