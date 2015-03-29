@@ -67,6 +67,7 @@ module.exports = function(grunt)
           './public/javascripts/*.js',
           './app.js',
           './routes/*.js',
+          './controllers/*.js',
           './bin/www'
         ],
         tasks: ['default'],
