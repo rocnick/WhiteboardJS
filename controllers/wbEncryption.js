@@ -5,7 +5,7 @@ module.exports = {
     var reverseEncoded = this.reverse(new Buffer(str).toString('base64'));
     var segments = reverseEncoded.match(/.{1,4}/g);
     
-    var seg = segments.splice(0, Math.ceil(segments.length / 2));
+    var seg = segments.splice(0, (segments.length / 2));
     segments = segments.concat(seg);
 
     toReturn = segments.join('');
@@ -17,11 +17,11 @@ module.exports = {
 
     var segments = str.match(/.{1,4}/g);
 
-    var seg = segments.splice(0, Math.ceil(segments.length / 2));
+    var seg = segments.splice(0, (segments.length / 2));
     segments = segments.concat(seg);
 
     var joined = segments.join('');
-    toReturn = this.reverse(new Buffer(joined, 'base64').toString('ascii'));
+    toReturn = (new Buffer(this.reverse(joined), 'base64').toString('ascii'));
 
     return toReturn;
   },
