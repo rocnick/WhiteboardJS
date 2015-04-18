@@ -11,12 +11,7 @@ router.get('/', function(req, res) {
 });
 
 router.post('/', function(req, res) {
-  var credentials = req.body;
-  
-  if(login.verifyCredentials(credentials))
-    res.send('successful login');
-  else
-    res.send('failed login');
+  var loginUser = new login(req.body, res);
 });
 
 module.exports = router; 

@@ -3,6 +3,15 @@ extends layout
 block content
   form(id='signup' method='post' action='')
     div
+      label(for='fName') First Name:
+      input(id='fName' name='fName' type='text')
+    div
+      label(for='lName') Last Name:
+      input(id='lName' name='lName' type='text')
+    div
+      label(for'username') Username:
+      input(id='username' name='username' type='text')
+    div
       label(for='email') Email:
       input(id='email' name='email' type='text')
     div

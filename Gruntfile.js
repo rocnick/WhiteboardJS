@@ -52,7 +52,8 @@ module.exports = function(grunt)
         './app.js',
         './routes/*.js',
         '!./public/javascripts/*angular*.js',
-        '!./public/javascripts/*d3*.js'
+        '!./public/javascripts/*d3*.js',
+        '!*.sql'
       ],
       options: { 
         globals: {
@@ -68,7 +69,9 @@ module.exports = function(grunt)
           './app.js',
           './routes/*.js',
           './controllers/*.js',
-          './bin/www'
+          './bin/www',
+          './dal/*.js',
+          '!*.sql'
         ],
         tasks: ['default'],
         options: {
