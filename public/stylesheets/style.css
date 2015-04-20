@@ -102,3 +102,19 @@ div#palette>.button {
   -moz-box-shadow: inset 0px 0px 15px -2px rgba(0,0,0,0.5);
   box-shadow: inset 0px 0px 15px -2px rgba(0,0,0,0.5);
 }
+div#palette>.button:hover {
+  -webkit-box-shadow: inset 0px 0px 25px -2px rgba(8,173,250,1);
+  -moz-box-shadow: inset 0px 0px 25px -2px rgba(8,173,250,1);
+  box-shadow: inset 0px 0px 25px -2px rgba(8,173,250,1);
+}
+div#palette>.button.active {
+  background: rgba(8,173,250,1);
+}
+div#palette>.button>img {
+  width: 28px;
+  height: 28px;
+  margin: 5px;
+}
+.cursor-brush {
+  cursor: url('../images/icons/Brush-outline.png'), none !important;
+}

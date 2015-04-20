@@ -1,3 +1,6 @@
+// Nick Snyder
+// Signup Controller
+
 var wbEncryption = require(__dirname + '/wbEncryption');
 var crypto = require('crypto');
 var User = require('../dal/user');
