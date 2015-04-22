@@ -168,8 +168,6 @@ whiteboard.prototype = {
         var width = (startPoint[0] >= endPoint[0]) ? (startPoint[0] - endPoint[0]) : (endPoint[0] - startPoint[0]);
         var height = (startPoint[1] >= endPoint[1]) ? (startPoint[1] - endPoint[1]) : (endPoint[1] - startPoint[1]);
 
-        var swapPoint = null;
-
         ele.setAttribute('x', ((startPoint[0] >= endPoint[0]) ? endPoint[0] : startPoint[0]));
         ele.setAttribute('y', ((startPoint[1] >= endPoint[1]) ? endPoint[1] : startPoint[1]));
 
@@ -228,8 +226,6 @@ whiteboard.prototype = {
         var endPoint = [context.mouse.x, context.mouse.y];
         var rx = (startPoint[0] >= endPoint[0]) ? (startPoint[0] - endPoint[0]) : (endPoint[0] - startPoint[0]);
         var ry = (startPoint[1] >= endPoint[1]) ? (startPoint[1] - endPoint[1]) : (endPoint[1] - startPoint[1]);
-
-        var swapPoint = null;
 
         ele.setAttribute('rx', rx);
         ele.setAttribute('ry', ry);
