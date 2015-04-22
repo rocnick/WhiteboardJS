@@ -97,15 +97,37 @@ whiteboard.prototype = {
     brush: {
       act: function(context, board, e)
       {
-        console.log('drawing with a brush');
+        var ele = document.getElementById(context.currentDraw);
+        var currentPoint = context.mouse.x + ',' + context.mouse.y;
+        var updatedPoints = ele.getAttribute('points') + ' ' + currentPoint;
+
+        ele.setAttribute('points', updatedPoints);
+
+        context.draw.redraw(board.children[0]);
       },
       begin: function(context, board, e)
       {
+        var currentPoint = context.mouse.start[0] + ',' + context.mouse.start[1];
+        var ele = document.createElement('polyline');
+        context.currentDraw = 'wbE' + board.children[0].children.length;
 
+        ele.setAttribute('id', context.currentDraw);
+        ele.setAttribute('points', currentPoint);
+        ele.setAttribute('stroke', 'black');
+        ele.setAttribute('stroke-opacity', '1');
+        ele.setAttribute('fill', 'none');
+        ele.setAttribute('stroke-width', '3');
+
+        board.children[0].appendChild(ele);
+        console.log('there');
+
+        context.draw.redraw(board.children[0]);
       },
       complete: function(context, board, e)
       {
+        context.mouse.start = context.mouse.end = [0,0];
 
+        context.draw.redraw(board.children[0]);
       },
       continuous: true,
       obj: false
@@ -113,15 +135,37 @@ whiteboard.prototype = {
     pencil: {
       act: function(context, board, e)
       {
-        console.log('drawing with a pencil');
+        var ele = document.getElementById(context.currentDraw);
+        var currentPoint = context.mouse.x + ',' + context.mouse.y;
+        var updatedPoints = ele.getAttribute('points') + ' ' + currentPoint;
+
+        ele.setAttribute('points', updatedPoints);
+
+        context.draw.redraw(board.children[0]);
       },
       begin: function(context, board, e)
       {
+        var currentPoint = context.mouse.start[0] + ',' + context.mouse.start[1];
+        var ele = document.createElement('polyline');
+        context.currentDraw = 'wbE' + board.children[0].children.length;
 
+        ele.setAttribute('id', context.currentDraw);
+        ele.setAttribute('points', currentPoint);
+        ele.setAttribute('stroke', 'black');
+        ele.setAttribute('stroke-opacity', '1');
+        ele.setAttribute('fill', 'none');
+        ele.setAttribute('stroke-width', '3');
+
+        board.children[0].appendChild(ele);
+        console.log('there');
+
+        context.draw.redraw(board.children[0]);
       },
       complete: function(context, board, e)
       {
+        context.mouse.start = context.mouse.end = [0,0];
 
+        context.draw.redraw(board.children[0]);
       },
       continuous: true,
       obj: false
