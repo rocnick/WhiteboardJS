@@ -21,13 +21,11 @@ module.exports = function(grunt)
     },
     express: {
       options: {
-        port: 1092,
-        spawn: false,
-        delay: 200
+        port: 1092
       },
       server: {
         options: {
-          script: './bin/www'
+          script: './app.js'
         }
       }
     },
@@ -35,7 +33,6 @@ module.exports = function(grunt)
       files: [
         './Gruntfile.js',
         './public/javascripts/*.js',
-        './bin/*',
         './app.js',
         './routes/*.js',
         '!./public/javascripts/*angular*.js',
@@ -56,7 +53,6 @@ module.exports = function(grunt)
           './app.js',
           './routes/*.js',
           './controllers/*.js',
-          './bin/www',
           './dal/*.js',
           '!*.sql'
         ],

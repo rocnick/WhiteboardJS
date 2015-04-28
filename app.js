@@ -15,6 +15,7 @@ var login = require('./routes/login');
 var logout = require('./routes/logout');
 
 var app = express();
+
 var viewState = {
     title: 'WhiteboardJS'
 };
@@ -67,5 +68,8 @@ app.use(function(err, req, res, next) {
     });
 });
 
+var server = app.listen((process.env.PORT || 1092), function() {
+    console.log('Express server listening on port ' + server.address().port);
+});
 
 module.exports = app;
