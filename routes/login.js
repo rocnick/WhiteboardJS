@@ -14,4 +14,4 @@ router.post('/', function(req, res) {
   var loginUser = new login(req.body, res);
 });
 
-module.exports = router; 
+module.exports = router;

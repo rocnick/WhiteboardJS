@@ -1,5 +1,9 @@
 //  Project:   Whiteboard JS
 //  Author:    Nick Snyder
+
+// JSHint handling
+/*jshint loopfunc: true */
+
 var whiteboard = function() {
   var context = this;
 
@@ -29,7 +33,7 @@ var whiteboard = function() {
   // Add the mouse cursor to the board
   var board = document.getElementById('board');
 
-  if (typeof board !== 'undefined')
+  if (typeof board !== 'undefined' && board !== null)
   {
     board.addEventListener('mousemove', function(e) {
       context.boardMouseMove(this, e);
@@ -109,17 +113,21 @@ whiteboard.prototype = {
       {
         var currentPoint = context.mouse.start[0] + ',' + context.mouse.start[1];
         var ele = document.createElement('polyline');
+        var strokeColor = document.getElementById('drawStrokeColor').value;
+        var strokeWidth = document.getElementById('drawStrokeWidth').value;
+        var strokeOpacity = parseInt(document.getElementById('drawStrokeOpacity').value) / 100;
         context.currentDraw = 'wbE' + board.children[0].children.length;
 
         ele.setAttribute('id', context.currentDraw);
         ele.setAttribute('points', currentPoint);
-        ele.setAttribute('stroke', 'black');
-        ele.setAttribute('stroke-opacity', '1');
+        ele.setAttribute('stroke', strokeColor);
+        ele.setAttribute('stroke-opacity', strokeOpacity);
         ele.setAttribute('fill', 'none');
-        ele.setAttribute('stroke-width', '3');
+        ele.setAttribute('stroke-width', strokeWidth);
+        ele.setAttribute('stroke-linecap', 'round');
+        ele.setAttribute('stroke-linejoin', 'round');
 
         board.children[0].appendChild(ele);
-        console.log('there');
 
         context.draw.redraw(board.children[0]);
       },
@@ -147,17 +155,21 @@ whiteboard.prototype = {
       {
         var currentPoint = context.mouse.start[0] + ',' + context.mouse.start[1];
         var ele = document.createElement('polyline');
+        var strokeColor = document.getElementById('drawStrokeColor').value;
+        var strokeWidth = document.getElementById('drawStrokeWidth').value;
+        var strokeOpacity = parseInt(document.getElementById('drawStrokeOpacity').value) / 100;
         context.currentDraw = 'wbE' + board.children[0].children.length;
 
         ele.setAttribute('id', context.currentDraw);
         ele.setAttribute('points', currentPoint);
-        ele.setAttribute('stroke', 'black');
-        ele.setAttribute('stroke-opacity', '1');
+        ele.setAttribute('stroke', strokeColor);
+        ele.setAttribute('stroke-opacity', strokeOpacity);
         ele.setAttribute('fill', 'none');
-        ele.setAttribute('stroke-width', '3');
+        ele.setAttribute('stroke-width', strokeWidth);
+        ele.setAttribute('stroke-linecap', 'butt');
+        ele.setAttribute('stroke-linejoin', 'miter');
 
         board.children[0].appendChild(ele);
-        console.log('there');
 
         context.draw.redraw(board.children[0]);
       },
@@ -224,6 +236,11 @@ whiteboard.prototype = {
       {
         var startPoint = context.mouse.start;
         var ele = document.createElement('rect');
+        var strokeColor = document.getElementById('drawStrokeColor').value;
+        var strokeWidth = document.getElementById('drawStrokeWidth').value;
+        var strokeOpacity = parseInt(document.getElementById('drawStrokeOpacity').value) / 100;
+        var fillColor = document.getElementById('drawFillColor').value;
+        var fillOpacity = parseInt(document.getElementById('drawFillOpacity').value) / 100;
         context.currentDraw = 'wbE' + board.children[0].children.length;
 
         ele.setAttribute('id', context.currentDraw);
@@ -231,10 +248,11 @@ whiteboard.prototype = {
         ele.setAttribute('y', startPoint[1]);
         ele.setAttribute('width', 1);
         ele.setAttribute('height', 1);
-        ele.setAttribute('stroke', 'black');
-        ele.setAttribute('stroke-opacity', '1');
-        ele.setAttribute('fill', 'purple');
-        ele.setAttribute('fill-opacity', '1');
+        ele.setAttribute('stroke', strokeColor);
+        ele.setAttribute('stroke-width', strokeWidth);
+        ele.setAttribute('stroke-opacity', strokeOpacity);
+        ele.setAttribute('fill', fillColor);
+        ele.setAttribute('fill-opacity', fillOpacity);
 
         board.children[0].appendChild(ele);
 
@@ -251,7 +269,7 @@ whiteboard.prototype = {
         // Reset the drawing positions
         context.mouse.start = context.mouse.end = [0,0];
 
-        if(width == 0 || height == 0)
+        if(width === 0 || height === 0)
         {
           ele.parentNode.removeChild(ele);
         }
@@ -280,6 +298,11 @@ whiteboard.prototype = {
       {
         var startPoint = context.mouse.start;
         var ele = document.createElement('ellipse');
+        var strokeColor = document.getElementById('drawStrokeColor').value;
+        var strokeWidth = document.getElementById('drawStrokeWidth').value;
+        var strokeOpacity = parseInt(document.getElementById('drawStrokeOpacity').value) / 100;
+        var fillColor = document.getElementById('drawFillColor').value;
+        var fillOpacity = parseInt(document.getElementById('drawFillOpacity').value) / 100;
         context.currentDraw = 'wbE' + board.children[0].children.length;
 
         ele.setAttribute('id', context.currentDraw);
@@ -287,9 +310,10 @@ whiteboard.prototype = {
         ele.setAttribute('cy', startPoint[1]);
         ele.setAttribute('rx', 1);
         ele.setAttribute('ry', 1);
-        ele.setAttribute('stroke', 'black');
+        ele.setAttribute('stroke', strokeColor);
+        ele.setAttribute('stroke-width', strokeWidth);
         ele.setAttribute('stroke-opacity', '1');
-        ele.setAttribute('fill', 'purple');
+        ele.setAttribute('fill', fillColor);
         ele.setAttribute('fill-opacity', '1');
 
         board.children[0].appendChild(ele);
@@ -307,7 +331,7 @@ whiteboard.prototype = {
         // Reset the drawing positions
         context.mouse.start = context.mouse.end = [0,0];
 
-        if(rx == 0 && ry == 0)
+        if(rx === 0 && ry === 0)
         {
           ele.parentNode.removeChild(ele);
         }
@@ -315,6 +339,22 @@ whiteboard.prototype = {
         context.draw.redraw(board.children[0]);
       },
       continuous: true,
+      obj: true
+    },
+    type: {
+      act: function(context, board, e)
+      {
+
+      },
+      begin: function(context, board, e)
+      {
+
+      },
+      complete: function(context, board, e)
+      {
+
+      },
+      continuous: false,
       obj: true
     },
     redraw: function(element)
@@ -332,7 +372,7 @@ whiteboard.prototype = {
     try
     {
       palette.style.height = board.style.height = parseInt(body.offsetHeight) - parseInt(header.offsetHeight) + 'px';
-      palette.style.marginTop = board.style.marginTop = parseInt(header.offsetHeight) + 'px';
+      //palette.style.marginTop = board.style.marginTop = parseInt(header.offsetHeight) + 'px';
     }
     catch(Exception) {}
   }

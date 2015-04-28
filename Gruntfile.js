@@ -17,19 +17,6 @@ module.exports = function(grunt)
             ]
           }
         ]
-      },
-      d3: {
-        files: [
-          {
-            expand: true,
-            dest: './public/javascripts',
-            cwd: './node_modules/d3',
-            src: [
-              '**/d3.js',
-              '**/d3.min.js'
-            ]
-          }
-        ]
       }
     },
     express: {

@@ -36,15 +36,27 @@ header>p>a {
   font-size: 16px;
 }
 #userPanel>a {
-  color: #FFF;
+  color: #BBB;
   text-decoration: none;
   cursor: pointer;
 }
+#userPanel>a:hover {
+  color: #EEE;
+}
+#userPanel>span {
+  margin: 0px 10px;
+}
 
+/* Non-Board Content */
+div#content {
+  margin: 120px 80px;
+}
+
+/* Board */
 div#board {
   background: #FFF;
   height: 100px;
-  margin-left: 102px;
+  margin-left: 112px;
   -webkit-box-shadow: inset 0px 0px 15px -2px rgba(0,0,0,0.5);
   -moz-box-shadow: inset 0px 0px 15px -2px rgba(0,0,0,0.5);
   box-shadow: inset 0px 0px 15px -2px rgba(0,0,0,0.5);
@@ -93,6 +105,7 @@ div#palette {
   width: 100px;
   float: left;
   height: 100px;
+  margin-top: 67px;
   padding: 5px;
 }
 div#palette>.button {
@@ -122,4 +135,30 @@ div#palette>.button>img {
 }
 .cursor-brush {
   cursor: url('../images/icons/Brush-outline.png'), crosshair !important;
+}
+div.paletteToolbar {
+  margin-top: 67px;
+  border-bottom: 2px solid #363636;
+}
+div.paletteToolbar>input {
+  margin: 0px 5px;
+}
+div.paletteToolbar>input:first-child {
+  margin-left: 0px;
+}
+div.paletteToolbar>input[type=number] {
+  position: relative;
+  top: -2px;
+  padding-left: 8px;
+  width: 32px;
+  height: 19px;
+}
+div.paletteToolbar>label {
+  font-size: 12px;
+}
+div.paletteToolbar>span {
+  margin-left: 10px;
+}
+div.paletteToolbar>span:first-child {
+  margin-left: 4px;
 }

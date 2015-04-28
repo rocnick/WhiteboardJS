@@ -1,0 +1,15 @@
+div(class='paletteToolbar')
+  span Stroke |
+  input(type='color' title='Stroke Color' id='drawStrokeColor' name='drawStrokeColor')
+  input(type='number' title='Stroke Width' value='3' min='0' max='25' id='drawStrokeWidth' name='drawStrokeWidth')
+  label(for='drawStrokeWidth') px
+
+  input(type='number' title='Stroke Opacity' value='100' min='0' max='100' id='drawStrokeOpacity' name='drawStrokeOpacity')
+  label(for='drawStrokeOpacity') %
+
+  span | Fill |
+
+  input(type='color' title='Fill Color' id='drawFillColor' name='drawFillColor')
+
+  input(type='number' title='Fill Opacity' value='100' min='0' max='100' id='drawFillOpacity' name='drawFillOpacity')
+  label(for='drawFillOpacity') %

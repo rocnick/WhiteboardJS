@@ -1,4 +1,7 @@
-div(id='userPanel')
+div(id='userPanel' ng-if='!loggedIn')
   a(href='login') Login
-   &nbsp; or&nbsp;
+  span or
   a(href='/signup') Sign Up
+div(id='userPanel' ng-if='loggedIn')
+  span Hi, {{userInfo.username}}!
+  a(href='logout') Logout

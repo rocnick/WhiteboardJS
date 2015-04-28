@@ -23,16 +23,30 @@ function Login()
   // Hash the password
   this.form.password = this.form.password2 = crypto.createHash('sha256').update(this.form.password).digest('hex');
 
-  var createUser = new User(null, null, this.form.password, null, null, this.form.email);
+  var checkedUser = new User(null, null, this.form.password, null, null, this.form.email);
 
-  createUser.login(function(result) {
+  checkedUser.login(function(result) {
     if(!result)
     {
       res.render('login', { title: 'WhiteboardJS' });
     }
     else
     {
-      res.render('index', { title: 'WhiteboardJS' });
+      // Generate an expiration date
+      var expirationTime = 604800000; // One week in milliseconds
+
+      var userInfo = {
+        userId: checkedUser.UserID,
+        username: checkedUser.Username,
+        first: checkedUser.FirstName,
+        last: checkedUser.LastName,
+        email: checkedUser.EmailAddress
+      };
+
+      res.status(200);
+      res.cookie('wbUser', userInfo, { maxAge: expirationTime });
+
+      res.redirect('/');
     }
   });
 }

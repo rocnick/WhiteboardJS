@@ -1,14 +1,17 @@
 doctype html
-html
+html(lang='en' ng-app='whiteboardApp')
   head
     title= title
     link(rel='stylesheet', href='//fonts.googleapis.com/css?family=Open+Sans')
     link(rel='stylesheet', href='/stylesheets/style.css')
-  body
+  body(ng-controller='wbCtrl')
     include header.jade
     
     block content
 
+    script.
+      var userInfo = !{user};
+
     script(src='javascripts/angular.min.js')
-    script(src='javascripts/d3.js')
+    script(src='javascripts/wbCtrl.js')
     script(src='javascripts/whiteboard.js')

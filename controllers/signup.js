@@ -38,7 +38,13 @@ function Signup()
       }
       else
       {
-        res.render('signupSuccess', { title: 'WhiteboardJS' });
+        // Generate an expiration date
+        var expirationTime = 604800000; // One week in milliseconds
+
+        res.status(200);
+        res.cookie('wbUser', result, { maxAge: expirationTime });
+        
+        res.redirect('/');
       }
     });
   }

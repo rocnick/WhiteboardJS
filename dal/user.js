@@ -33,12 +33,8 @@ User.prototype = {
 
         var context = this;
         var sqlQuery = 'SELECT UserID, Username, Password, FirstName, LastName, EmailAddress FROM User WHERE UserID = ?';
-
-        db.connect();
         
         var toReturn = db.query(sqlQuery, [this.UserID], function(err, result) {
-            db.end();
-
             if(err)
             {
                 if(typeof callback === 'function')
@@ -84,10 +80,7 @@ User.prototype = {
         var context = this;
         var sqlQuery = 'SELECT UserID, Username, Password, FirstName, LastName, EmailAddress FROM User WHERE EmailAddress = ? AND Password = ?';
 
-        db.connect();
-
         var toReturn = db.query(sqlQuery, [this.EmailAddress, this.Password], function(err, result) {
-            db.end();
 
             if(err)
             {
@@ -136,16 +129,8 @@ User.prototype = {
 
         var context = this;
         var sqlQuery = 'INSERT INTO User (Username, Password, FirstName, LastName, EmailAddress) VALUES(?, ?, ?, ?, ?)';
-
-        db.connect();
-
+        
         var toReturn = db.query(sqlQuery, [this.Username, this.Password, this.FirstName, this.LastName, this.EmailAddress], function(err, result) {
-            db.end();
-
-            console.log('err');
-            console.log(err);
-            console.log('result');
-            console.log(result);
 
             if(err)
             {
@@ -189,10 +174,7 @@ User.prototype = {
 
         var sqlQuery = 'UPDATE User SET Username = ?, Password = ?, FirstName = ?, LastName = ?, EmailAddress = ? WHERE UserID = ?';
 
-        db.connect();
-
         var toReturn = db.query(sqlQuery, [this.Username, this.Password, this.FirstName, this.LastName, this.EmailAddress, this.UserID], function(err, result) {
-            db.end();
 
             if(err)
             {
@@ -231,10 +213,7 @@ User.prototype = {
         var context = this;
         var sqlQuery =  'DELETE FROM User WHERE UserID = ?';
 
-        db.connect();
-
         var toReturn = db.query(sqlQuery, [this.UserID], function(err, result) {
-            db.end();
 
             if(err)
             {
