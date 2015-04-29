@@ -18,6 +18,12 @@ var whiteboard = function() {
   this.canvas = [];
   this.currentDraw = null;
 
+  this.socket = io('http://localhost:1093');
+  this.socket.on('boards', function (data) {
+    console.log(data);
+  });
+  /* End Le Awesome socket connection gone wrong */
+
   window.onresize = document.getElementsByTagName('body')[0].onload = this.resizeWorkspace;
 
   // Attach click handlers to palette buttons
@@ -48,6 +54,10 @@ var whiteboard = function() {
 };
 
 whiteboard.prototype = {
+  init: function()
+  {
+
+  },
   paletteClick: function(context, e)
   {
     var activePalette = document.getElementsByClassName('active');
@@ -107,7 +117,7 @@ whiteboard.prototype = {
 
         ele.setAttribute('points', updatedPoints);
 
-        context.draw.redraw(board.children[0]);
+        context.draw.redraw(context, board.children[0]);
       },
       begin: function(context, board, e)
       {
@@ -129,13 +139,13 @@ whiteboard.prototype = {
 
         board.children[0].appendChild(ele);
 
-        context.draw.redraw(board.children[0]);
+        context.draw.redraw(context, board.children[0]);
       },
       complete: function(context, board, e)
       {
         context.mouse.start = context.mouse.end = [0,0];
 
-        context.draw.redraw(board.children[0]);
+        context.draw.redraw(context, board.children[0]);
       },
       continuous: true,
       obj: false
@@ -149,7 +159,7 @@ whiteboard.prototype = {
 
         ele.setAttribute('points', updatedPoints);
 
-        context.draw.redraw(board.children[0]);
+        context.draw.redraw(context, board.children[0]);
       },
       begin: function(context, board, e)
       {
@@ -171,13 +181,13 @@ whiteboard.prototype = {
 
         board.children[0].appendChild(ele);
 
-        context.draw.redraw(board.children[0]);
+        context.draw.redraw(context, board.children[0]);
       },
       complete: function(context, board, e)
       {
         context.mouse.start = context.mouse.end = [0,0];
 
-        context.draw.redraw(board.children[0]);
+        context.draw.redraw(context, board.children[0]);
       },
       continuous: true,
       obj: false
@@ -230,7 +240,7 @@ whiteboard.prototype = {
         ele.setAttribute('width', width);
         ele.setAttribute('height', height);
 
-        context.draw.redraw(board.children[0]);
+        context.draw.redraw(context, board.children[0]);
       },
       begin: function(context, board, e)
       {
@@ -256,7 +266,7 @@ whiteboard.prototype = {
 
         board.children[0].appendChild(ele);
 
-        context.draw.redraw(board.children[0]);
+        context.draw.redraw(context, board.children[0]);
       },
       complete: function(context, board, e)
       {
@@ -274,7 +284,7 @@ whiteboard.prototype = {
           ele.parentNode.removeChild(ele);
         }
 
-        context.draw.redraw(board.children[0]);
+        context.draw.redraw(context, board.children[0]);
       },
       continuous: true,
       obj: true
@@ -292,7 +302,7 @@ whiteboard.prototype = {
         ele.setAttribute('rx', rx);
         ele.setAttribute('ry', ry);
 
-        context.draw.redraw(board.children[0]);
+        context.draw.redraw(context, board.children[0]);
       },
       begin: function(context, board, e)
       {
@@ -318,7 +328,7 @@ whiteboard.prototype = {
 
         board.children[0].appendChild(ele);
 
-        context.draw.redraw(board.children[0]);
+        context.draw.redraw(context, board.children[0]);
       },
       complete: function(context, board, e)
       {
@@ -336,7 +346,7 @@ whiteboard.prototype = {
           ele.parentNode.removeChild(ele);
         }
 
-        context.draw.redraw(board.children[0]);
+        context.draw.redraw(context, board.children[0]);
       },
       continuous: true,
       obj: true
@@ -357,9 +367,20 @@ whiteboard.prototype = {
       continuous: false,
       obj: true
     },
-    redraw: function(element)
+    redraw: function(context, element)
     {
       element.innerHTML = element.innerHTML;
+      
+      if(typeof userInfo.userId === 'undefined' || userInfo.userId === null)
+      {
+        return;
+      }
+
+      var data = {
+        userId: userInfo.userId,
+        board: element.innerHTML
+      };
+      context.socket.emit('inboundBoard', data);
     }
   },
   resizeWorkspace: function()

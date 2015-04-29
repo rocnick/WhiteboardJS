@@ -37,6 +37,7 @@ module.exports = function(grunt)
         './routes/*.js',
         '!./public/javascripts/*angular*.js',
         '!./public/javascripts/*d3*.js',
+        '!./public/javascripts/socket.io.js',
         '!*.sql'
       ],
       options: { 
