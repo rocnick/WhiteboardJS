@@ -12,7 +12,7 @@ function Whiteboard()
 
   this.userBoards = null;
 
-  this.showIndex();
+  this.getBoards(req.cookies.wbUser.userId);
 }
 
 Whiteboard.prototype = {
@@ -20,27 +20,49 @@ Whiteboard.prototype = {
   {
     // Gather out the user cookie
     var userInfo = (typeof req.cookies.wbUser !== 'undefined') ? JSON.stringify(req.cookies.wbUser) : 'undefined';
-
-    this.boards = this.getBoards(req.cookies.wbUser.userId);
+    var boardCollection = (typeof this.userBoards !== 'undefined') ? JSON.stringify(this.userBoards) : 'undefined';
 
     res.render('index', {
       title: 'WhiteboardJS',
       user: userInfo,
-      userBoards: this.boards
+      userBoards: boardCollection
     });
+  },
+  createFreshBoard: function(userId, callback)
+  {
+    console.log(userId);
+    console.log('hwowijafsodifjasdfoijsdfoisjdfosidjfsodifj')
+    var newBoard = new board(null, userId, '');
+
+    newBoard.insert(callback);
   },
   getBoards: function(userId)
   {
     if(typeof userId === 'undefined' || userId === null)
     {
-      return 'undefined';
+      this.userBoards = 'undefined';
+      return;
     }
+
+    var context = this;
+    var callback = function(result) {
+      context.userBoards = result;
+
+      if(!result)
+      {
+        context.createFreshBoard(userId, function() {
+          context.showIndex();
+        });
+      }
+      else
+      {
+        context.showIndex();
+      }
+    };
 
     var foundBoards = new board();
     foundBoards.UserID = userId;
 
-    foundBoards.fetchAll(function(result) {
-      console.log(result);
-    });
+    foundBoards.fetchAll(callback);
   }
 };

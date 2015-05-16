@@ -22,7 +22,6 @@ var whiteboard = function() {
   this.socket.on('boards', function (data) {
     console.log(data);
   });
-  /* End Le Awesome socket connection gone wrong */
 
   window.onresize = document.getElementsByTagName('body')[0].onload = this.resizeWorkspace;
 

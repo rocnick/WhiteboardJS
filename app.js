@@ -72,9 +72,11 @@ app.use(function(err, req, res, next) {
 });
 
 io.on('connection', function(socket) {
-  //socket.emit('news', { hello: 'world' });
+  board.deliver(function(results) {
+    socket.emit('boards', results);
+  });
   socket.on('inboundBoard', function (data) {
-    board.insert(data);
+    board.upsert(data);
   });
 });
 

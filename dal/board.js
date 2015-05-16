@@ -137,6 +137,35 @@ Board.prototype = {
 
         var context = this;
         var sqlQuery = 'INSERT INTO Board (UserID) VALUES(?)';
+        var mongoQuery = '';
+
+        var url = mongoCredentials.getUrl();
+
+        var insertBoard = function(db, cf)
+        {
+          // Insert the object into the collection
+          var boardCollection = db.collection('boards');
+
+          var data = {
+            userId: this.UserID,
+            board: this.BoardContent
+          };
+
+          boardCollection.insert(data, function(err, result) {
+            cf(result);
+          })
+        }
+        
+        // Use connect method to connect to the Server 
+        mongo.connect(url, function(err, db) {
+          assert.equal(null, err);
+
+          insertBoard(db, function(result, callback) {
+            console.log(result);
+
+            db.close();
+          });
+        });
         
         var toReturn = db.query(sqlQuery, [this.UserID], function(err, result) {
 
@@ -144,7 +173,7 @@ Board.prototype = {
             {
                 if(typeof callback === 'function')
                 {
-                    callback(false);
+                    //callback(false);
                 }
                 return;
             }
@@ -154,17 +183,38 @@ Board.prototype = {
                 context.BoardID = result.insertId
                 if(typeof callback === 'function')
                 {
-                    callback(result.insertId);
+                    //callback(result.insertId);
                 }
             }
             else
             {
                 if(typeof callback === 'function')
                 {
-                    callback(false);
+                    //callback(false);
                 }
             }
         });
+    },
+    upsert: function(callback)
+    {
+        if(typeof this.UserID === 'undefined')
+        {
+            if(typeof callback === 'function')
+            {
+                callback(false);
+            }
+            return;
+        }
+
+        if(typeof this.BoardContent === 'undefined' || this.BoardContent === null)
+        {
+            this.BoardContent = '';
+        }
+
+        if(typeof this.BoardID === 'undefined' || this.BoardID == null)
+        {
+            this.insert(function() { console.log(result); });
+        }
     },
     delete: function(callback)
     {
