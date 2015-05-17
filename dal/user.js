@@ -139,7 +139,7 @@ User.prototype = {
                     callback(false);
                 }
             }
-
+            console.log(result);
             if(typeof result.insertId !== 'undefined')
             {
                 context.UserID = result.insertId
