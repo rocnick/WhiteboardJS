@@ -71,9 +71,12 @@ app.use(function(err, req, res, next) {
     });
 });
 
+// Handling the socket communication
 io.on('connection', function(socket) {
-  board.deliver(function(results) {
-    socket.emit('boards', results);
+  socket.on('requestBoards', function(data) {
+    board.deliver(data, function(results) {
+        socket.emit('boards', results);
+    });
   });
   socket.on('inboundBoard', function (data) {
     board.upsert(data);

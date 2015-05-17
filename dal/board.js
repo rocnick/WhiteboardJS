@@ -72,56 +72,35 @@ Board.prototype = {
         {
             if(typeof callback === 'function')
             {
-                callback(false);
+                callback([]);
             }
             return;
         }
 
         var context = this;
-        var sqlQuery = 'SELECT BoardID, UserID FROM Board WHERE UserID = ?';
+        var url = mongoCredentials.getUrl();
 
-        var toReturn = db.query(sqlQuery, [this.UserID], function(err, result) {
-            if(err)
-            {
-                if(typeof callback === 'function')
-                {
-                    callback(false);
-                }
-                return;
-            }
+        var gatherBoards = function(db, cf)
+        {
+            // Gather the documents
+            var boardCollection = db.collection('boards');
+            boardCollection.find({
+                "UserID": context.UserID
+            }).toArray(function(err, result) {
+                assert.equal(null, err);
+                cf(result);
+            });
+        };
 
-            if(result.length > 0)
-            {
-                context.BoardCollection = [];
-                var url = mongoCredentials.getUrl();
+        mongo.connect(url, function(err, db) {
+            assert.equal(null, err);
 
-                for(var i = 0, l = result.length; i < l; i++)
-                {
-                    // Collect the board from Mongo
-                    var collectedBoard = '<svg></svg>';
+            gatherBoards(db, function(result) {
+                db.close();
 
-                    var ObjectID = require('mongodb').ObjectID();
-
-                    context.BoardCollection.push({
-                        BoardID: result[i].BoardID,
-                        UserID: result[i].UserID,
-                        Board: collectedBoard
-                    });
-                }
-
-                if(typeof callback === 'function')
-                {
-                    callback(context.BoardCollection);
-                }
-            }
-            else
-            {
-                if(typeof callback === 'function')
-                {
-                    callback(false);
-                }
-            }
-        });
+                callback(result);
+            });
+        })
     },
     insert: function(callback)
     {
@@ -146,52 +125,41 @@ Board.prototype = {
           // Insert the object into the collection
           var boardCollection = db.collection('boards');
 
-          var data = {
-            userId: this.UserID,
-            board: this.BoardContent
-          };
-
-          boardCollection.insert(data, function(err, result) {
-            cf(result);
-          })
+          boardCollection.update({
+                "_id": context.BoardID,
+                "UserID": context.UserID
+            },
+            {
+                "_id": context.BoardID,
+                "UserID": context.UserID,
+                "Board": context.BoardContent
+            },
+            {
+                upsert: true
+            },
+            function(err, result) {
+                cf(result);
+            });
         }
         
-        // Use connect method to connect to the Server 
-        mongo.connect(url, function(err, db) {
-          assert.equal(null, err);
-
-          insertBoard(db, function(result, callback) {
-            console.log(result);
-
-            db.close();
-          });
-        });
-        
-        var toReturn = db.query(sqlQuery, [this.UserID], function(err, result) {
-
+        db.query(sqlQuery, [this.UserID], function(err, result) {
             if(err)
             {
-                if(typeof callback === 'function')
-                {
-                    //callback(false);
-                }
                 return;
             }
-
+            
             if(typeof result.insertId !== 'undefined')
             {
-                context.BoardID = result.insertId
-                if(typeof callback === 'function')
-                {
-                    //callback(result.insertId);
-                }
-            }
-            else
-            {
-                if(typeof callback === 'function')
-                {
-                    //callback(false);
-                }
+                context.BoardID = result.insertId;
+
+                // Use connect method to connect to the Server 
+                mongo.connect(url, function(err, db) {
+                    assert.equal(null, err);
+
+                    insertBoard(db, function(result, callback) {
+                        db.close();
+                    });
+                });
             }
         });
     },
@@ -206,6 +174,32 @@ Board.prototype = {
             return;
         }
 
+        var context = this;
+        var mongoQuery = '';
+        var url = mongoCredentials.getUrl();
+
+        var insertBoard = function(db, cf)
+        {
+          // Insert the object into the collection
+          var boardCollection = db.collection('boards');
+
+          boardCollection.update({
+                "_id": context.BoardID,
+                "UserID": context.UserID
+            },
+            {
+                "_id": context.BoardID,
+                "UserID": context.UserID,
+                "Board": context.BoardContent
+            },
+            {
+                upsert: true
+            },
+            function(err, result) {
+                cf(result);
+            });
+        }
+
         if(typeof this.BoardContent === 'undefined' || this.BoardContent === null)
         {
             this.BoardContent = '';
@@ -213,7 +207,18 @@ Board.prototype = {
 
         if(typeof this.BoardID === 'undefined' || this.BoardID == null)
         {
-            this.insert(function() { console.log(result); });
+            this.insert(function() {  });
+        }
+        else
+        {
+            // Use connect method to connect to the Server 
+            mongo.connect(url, function(err, db) {
+                assert.equal(null, err);
+
+                insertBoard(db, function(result, callback) {
+                    db.close();
+                });
+            });
         }
     },
     delete: function(callback)

@@ -7,6 +7,7 @@
 var whiteboard = function() {
   var context = this;
 
+  this.boardId = null;
   this.brush = 'brush';
   this.mouse = {
     x: 0,
@@ -19,6 +20,7 @@ var whiteboard = function() {
   this.currentDraw = null;
 
   this.socket = io('http://localhost:1093');
+  
   this.socket.on('boards', function (data) {
     console.log(data);
   });
@@ -50,12 +52,23 @@ var whiteboard = function() {
       context.boardMouseUp(this, e);
     });
   }
+
+  this.init();
 };
 
 whiteboard.prototype = {
   init: function()
   {
-
+    if(typeof boardInfo !== 'undefined' && boardInfo !== null && boardInfo != 'undefined')
+    {
+      // We are going to take the first board and make it the working board
+      if(typeof boardInfo[0]._id !== 'undefined' && boardInfo[0]._id !== null && boardInfo[0]._id !== 'undefined')
+      {
+        this.boardId = boardInfo[0]._id;
+        var board = document.getElementById('board');
+        board.innerHTML = '<svg>' + boardInfo[0].Board + '</svg>';
+      }
+    }
   },
   paletteClick: function(context, e)
   {
@@ -370,14 +383,15 @@ whiteboard.prototype = {
     {
       element.innerHTML = element.innerHTML;
       
-      if(typeof userInfo.userId === 'undefined' || userInfo.userId === null)
+      if((typeof userInfo === 'undefined' || userInfo === null) || (typeof userInfo.userId === 'undefined' || userInfo.userId === null))
       {
         return;
       }
 
       var data = {
-        userId: userInfo.userId,
-        board: element.innerHTML
+        "BoardID": context.boardId,
+        "UserID": userInfo.userId,
+        "Board": element.innerHTML
       };
       context.socket.emit('inboundBoard', data);
     }
@@ -392,7 +406,6 @@ whiteboard.prototype = {
     try
     {
       palette.style.height = board.style.height = parseInt(body.offsetHeight) - parseInt(header.offsetHeight) + 'px';
-      //palette.style.marginTop = board.style.marginTop = parseInt(header.offsetHeight) + 'px';
     }
     catch(Exception) {}
   }

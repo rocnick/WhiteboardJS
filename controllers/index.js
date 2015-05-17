@@ -33,13 +33,16 @@ Whiteboard.prototype = {
   {
     var newBoard = new board(null, userId, '');
 
-    newBoard.insert(callback);
+    //newBoard.insert(callback);
+    callback();
   },
   getBoards: function(userId)
   {
-    if(typeof userId === 'undefined' || userId === null)
+    if(typeof userId === 'undefined' || userId === 'undefined' || userId === null)
     {
       this.userBoards = 'undefined';
+
+      this.showIndex();
       return;
     }
 

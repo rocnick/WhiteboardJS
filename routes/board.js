@@ -4,9 +4,16 @@
 var board = require('../dal/board');
 
 module.exports = {
-  deliver: function(callback)
+  deliver: function(data, callback)
   {
-    var boardCollection = [];
+    var userBoards = new board(null, data.userId, null);
+
+    var boardCollection = userBoards.fetchAll(function() {
+      if(typeof callback === 'function')
+      {
+        callback();
+      }
+    });
 
     if(typeof callback === 'function')
     {
@@ -20,15 +27,15 @@ module.exports = {
       return;
     }
 
-    if(typeof data.boardId === 'undefined')
+    if(typeof data.BoardID === 'undefined')
     {
-      data.boardId = null;
+      data.BoardID = null;
     }
 
-    var dbBoard = new board(data.boardId, data.userId, data.board);
+    var dbBoard = new board(data.BoardID, data.UserID, data.Board);
 
-    console.log(dbBoard);
-    //dbBoard.upsert();
+    //console.log(dbBoard);
+    dbBoard.upsert();
   },
   createBoard: function()
   {
