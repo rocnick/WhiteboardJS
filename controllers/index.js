@@ -11,8 +11,9 @@ function Whiteboard()
   res = (typeof arguments[1] !== 'undefined') ? arguments[1] : null;
 
   this.userBoards = null;
+  this.userInfo = (typeof req.cookies.wbUser !== 'undefined') ? req.cookies.wbUser.userId : 'undefined';
 
-  this.getBoards(req.cookies.wbUser.userId);
+  this.getBoards(this.userInfo);
 }
 
 Whiteboard.prototype = {
@@ -30,8 +31,6 @@ Whiteboard.prototype = {
   },
   createFreshBoard: function(userId, callback)
   {
-    console.log(userId);
-    console.log('hwowijafsodifjasdfoijsdfoisjdfosidjfsodifj')
     var newBoard = new board(null, userId, '');
 
     newBoard.insert(callback);
