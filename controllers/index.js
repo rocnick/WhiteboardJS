@@ -33,8 +33,7 @@ Whiteboard.prototype = {
   {
     var newBoard = new board(null, userId, '');
 
-    //newBoard.insert(callback);
-    callback();
+    newBoard.insert(callback);
   },
   getBoards: function(userId)
   {
@@ -50,9 +49,11 @@ Whiteboard.prototype = {
     var callback = function(result) {
       context.userBoards = result;
 
-      if(!result)
+      if(!result || result.length == 0)
       {
-        context.createFreshBoard(userId, function() {
+        context.createFreshBoard(userId, function(result) {
+          context.userBoards = result;
+
           context.showIndex();
         });
       }

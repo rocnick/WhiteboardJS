@@ -109,6 +109,7 @@ Board.prototype = {
         {
             if(typeof callback === 'function')
             {
+                console.log('it is getting kicked out');
                 callback(false);
                 return;
             }
@@ -156,8 +157,19 @@ Board.prototype = {
                 mongo.connect(url, function(err, db) {
                     assert.equal(null, err);
 
-                    insertBoard(db, function(result, callback) {
+                    insertBoard(db, function(result, cback) {
                         db.close();
+
+                        context.BoardID = result.result.upserted[0]._id;
+                        var toReturn = [
+                            {
+                                "_id": context.BoardID,
+                                "UserID": context.UserID,
+                                "Board": ''
+                            }
+                        ];
+
+                        callback(toReturn);
                     });
                 });
             }

@@ -79,7 +79,8 @@ io.on('connection', function(socket) {
     });
   });
   socket.on('inboundBoard', function (data) {
-    board.upsert(data);
+    if(data.commit)
+        board.upsert(data);
   });
 });
 

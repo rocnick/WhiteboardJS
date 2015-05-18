@@ -50,7 +50,7 @@ var whiteboard = function() {
     }, false);
     board.addEventListener('mouseup', function(e) {
       context.boardMouseUp(this, e);
-    });
+    }, false);
   }
 
   this.init();
@@ -59,7 +59,7 @@ var whiteboard = function() {
 whiteboard.prototype = {
   init: function()
   {
-    if(typeof boardInfo !== 'undefined' && boardInfo !== null && boardInfo != 'undefined')
+    if(typeof boardInfo[0] !== 'undefined' && boardInfo[0] !== null && boardInfo[0] != 'undefined')
     {
       // We are going to take the first board and make it the working board
       if(typeof boardInfo[0]._id !== 'undefined' && boardInfo[0]._id !== null && boardInfo[0]._id !== 'undefined')
@@ -97,17 +97,17 @@ whiteboard.prototype = {
   },
   boardMouseUp: function(context, e)
   {
+    this.mouse.down = false;
+
     if (this.draw[this.brush].obj)
     {
       this.mouse.end = [
         this.mouse.x,
         this.mouse.y
       ];
-
+      
       this.draw[this.brush].complete(this, context, e);
     }
-
-    this.mouse.down = false;
   },
   boardMouseMove: function(context, e)
   {
@@ -160,7 +160,7 @@ whiteboard.prototype = {
         context.draw.redraw(context, board.children[0]);
       },
       continuous: true,
-      obj: false
+      obj: true
     },
     pencil: {
       act: function(context, board, e)
@@ -391,7 +391,8 @@ whiteboard.prototype = {
       var data = {
         "BoardID": context.boardId,
         "UserID": userInfo.userId,
-        "Board": element.innerHTML
+        "Board": element.innerHTML,
+        "commit": !context.mouse.down
       };
       context.socket.emit('inboundBoard', data);
     }
