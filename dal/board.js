@@ -104,8 +104,7 @@ Board.prototype = {
     },
     insert: function(callback)
     {
-        if((typeof this.UserID === 'undefined' || this.UserID === null)
-            || (typeof this.BoardContent === 'undefined' || this.BoardContent === null))
+        if((typeof this.UserID === 'undefined' || this.UserID === null))
         {
             if(typeof callback === 'function')
             {
@@ -115,9 +114,13 @@ Board.prototype = {
             }
         }
 
+        if (typeof this.BoardContent === 'undefined' || this.BoardContent === null)
+        {
+            this.BoardContent = '';
+        }
+
         var context = this;
         var sqlQuery = 'INSERT INTO Board (UserID) VALUES(?)';
-        var mongoQuery = '';
 
         var url = mongoCredentials.getUrl();
 
@@ -235,7 +238,8 @@ Board.prototype = {
     },
     delete: function(callback)
     {
-        if(typeof this.BoardID === 'undefined' || this.BoardID == null)
+        if((typeof this.BoardID === 'undefined' || this.BoardID === null)
+            || (typeof this.UserID === 'undefined' || this.UserID === null))
         {
             if(typeof callback === 'function')
             {
@@ -245,10 +249,24 @@ Board.prototype = {
         }
 
         var context = this;
-        var sqlQuery =  'DELETE FROM Board WHERE BoardID = ?';
+        var sqlQuery =  'DELETE FROM Board WHERE BoardID = ? AND UserID = ?';
+        var url = mongoCredentials.getUrl();
 
-        var toReturn = db.query(sqlQuery, [this.BoardID], function(err, result) {
+        var deleteBoard = function(db, cf)
+        {
+          // Insert the object into the collection
+          var boardCollection = db.collection('boards');
 
+          boardCollection.remove({
+                "_id": context.BoardID,
+                "UserID": context.UserID
+            },
+            function(err, result) {
+                cf(result);
+            });
+        }
+
+        db.query(sqlQuery, [this.BoardID, this.UserID], function(err, result) {
             if(err)
             {
                 if(typeof callback === 'function')
@@ -260,19 +278,31 @@ Board.prototype = {
 
             if(result.affectedRows > 0)
             {
-                context.BoardID = null;
-                context.UserID = null;
+                // Use connect method to connect to the Server 
+                mongo.connect(url, function(err, db) {
+                    assert.equal(null, err);
 
-                if(typeof callback === 'function')
-                {
-                    callback(true);
-                }
+                    deleteBoard(db, function(result, cback) {
+                        db.close();
+
+                        var oldId = context.BoardID; 
+
+                        context.BoardID = null;
+                        context.UserID = null;
+
+                        if(typeof callback === 'function')
+                        {
+                            callback({ "status": true, "BoardID": oldId });
+                        }
+                    });
+                });
             }
             else
             {
                 if(typeof callback === 'function')
                 {
                     callback(false);
+                    return;
                 }
             }
         });

@@ -19,10 +19,26 @@ var whiteboard = function() {
   this.canvas = [];
   this.currentDraw = null;
 
-  this.socket = io('http://localhost:1093');
+  var siteHost = window.location.host.toString();
+  var sitePort = 81;
+
+  if (siteHost.indexOf(':') !== -1)
+  {
+    var siteInfo = siteHost.split(':');
+    siteHost = siteInfo[0];
+    sitePort = parseInt(siteInfo[1]) + 1;
+  }
+
+  this.socket = io('http://' + siteHost + ':' + sitePort);
   
   this.socket.on('boards', function (data) {
     console.log(data);
+  });
+  this.socket.on('createdBoard', function(data) {
+    context.addCreatedBoard(data);
+  });
+  this.socket.on('deletionResponse', function(data) {
+    context.finalizeDeletion(data);
   });
 
   window.onresize = document.getElementsByTagName('body')[0].onload = this.resizeWorkspace;
@@ -59,6 +75,8 @@ var whiteboard = function() {
 whiteboard.prototype = {
   init: function()
   {
+    var context = this;
+
     if(typeof boardInfo[0] !== 'undefined' && boardInfo[0] !== null && boardInfo[0] != 'undefined')
     {
       // We are going to take the first board and make it the working board
@@ -69,6 +87,176 @@ whiteboard.prototype = {
         board.innerHTML = '<svg>' + boardInfo[0].Board + '</svg>';
       }
     }
+
+    // Using jQuery here because animations
+    $(document).ready(function() {
+      var addBoard = document.createElement('div');
+      addBoard.setAttribute('class', 'addBoard');
+      addBoard.setAttribute('id', 'addBoardButton');
+      addBoard.addEventListener('click', function(e) {
+        context.newBoardClick(this, e);
+      }, false);
+
+      $('#userBoards').append(addBoard);
+
+      for(var i = 0, l = boardInfo.length; i < l; i++)
+      {
+        var bp = document.createElement('div');
+        var del = document.createElement('div');
+
+        del.setAttribute('class', 'deleteBoard');
+        del.addEventListener('click', function(e) {
+          context.deleteBoardClick(this, e);
+        });
+
+        bp.style.width = '150px';
+        bp.style.height = '90px';
+        bp.style.borderWidth = '1px';
+        bp.style.borderStyle = 'solid';
+        bp.style.borderColor = '#000';
+        bp.style.margin = '4px 10px';
+        bp.setAttribute('class', 'boardThumb');
+        bp.setAttribute('data-board', boardInfo[i]._id);
+
+        bp.addEventListener('click', function(e) {
+          context.selectBoard(this, e);
+        });
+
+        if(boardInfo[i]._id == context.boardId)
+        {
+          bp.setAttribute('class', bp.getAttribute('class') + ' activeBoard');
+        }
+
+        bp.innerHTML = '<svg width="100%" height ="100%"><g transform="scale(0.3)">' + boardInfo[i].Board + '</g></svg>';
+
+        bp.appendChild(del);
+        $('#userBoards').append(bp);
+      }
+
+      $('#userBoards .handle').on('click', function() {
+        var newWidth = 20;
+        
+        if ($(this).parent().width() == 20)
+        {
+          newWidth = $(this).parent().parent().width() - $('#palette').width() -14;
+        }
+
+        $(this).css({
+          width: '20px'
+        }).parent().animate({
+          width: newWidth
+        }, 1000);
+      });
+    });
+  },
+  selectBoard: function(context, e)
+  {
+    var selectedBoard = context.dataset.board;
+    var activeThumbs = document.getElementsByClassName('boardThumb');
+
+    for(var i = 0, l = activeThumbs.length; i < l; i++)
+    {
+      if(activeThumbs[i].getAttribute('class').indexOf('activeBoard') != -1)
+      {
+        activeThumbs[i].setAttribute('class', (activeThumbs[i].getAttribute('class')).replace('activeBoard', '').replace('  ', ' '));  
+      }
+      
+      if(activeThumbs[i].dataset.board == selectedBoard)
+      {
+        activeThumbs[i].setAttribute('class', activeThumbs[i].getAttribute('class') + ' activeBoard');
+      }
+    }
+
+    this.boardId = selectedBoard;
+
+    for(var i = 0, l = boardInfo.length; i < l; i++)
+    {
+      if(boardInfo[i]._id == selectedBoard)
+      {
+        var staleBoard = document.getElementById('board');
+        staleBoard.innerHTML = '<svg>' + boardInfo[i].Board + '</svg>';
+        break;
+      }
+    }
+  },
+  addCreatedBoard: function(board)
+  {
+    context = this;
+
+    var addBoardButton = document.getElementById('addBoardButton');
+    var bp = document.createElement('div');
+    var staleBoard = document.getElementById('board');
+    var activeBoards = document.getElementsByClassName('activeBoard');
+    var del = document.createElement('div');
+
+    del.setAttribute('class', 'deleteBoard');
+    del.addEventListener('click', function(e) {
+      context.deleteBoardClick(this, e);
+    });
+
+    for(var i = 0, l = activeBoards.length; i < l; i++)
+    {
+      activeBoards[i].setAttribute('class', (activeBoards[i].getAttribute('class')).replace('activeBoard', '').replace('  ', ' '));
+    }
+
+    bp.style.width = '150px';
+    bp.style.height = '90px';
+    bp.style.borderWidth = '1px';
+    bp.style.borderStyle = 'solid';
+    bp.style.borderColor = '#000';
+    bp.style.margin = '4px 10px';
+
+    bp.setAttribute('class', 'boardThumb');
+    bp.setAttribute('class', bp.getAttribute('class') + ' activeBoard');
+    bp.setAttribute('data-board', board.BoardID);
+
+    bp.innerHTML = '<svg width="100%" height ="100%"></svg>';
+    staleBoard.innerHTML = '<svg></svg>';
+
+    boardInfo.unshift(board);
+
+    bp.appendChild(del);
+    addBoardButton.parentNode.insertBefore(bp, addBoardButton.nextSibling);
+  },
+  finalizeDeletion: function(board)
+  {
+    if(this.boardId == board.BoardID)
+    {
+      var staleBoard = document.getElementById('board');
+      staleBoard.innerHTML = '<svg></svg>';
+    }
+
+    var boardThumb = document.getElementsByClassName('boardThumb');
+
+    for(var i = 0, l = boardThumb.length; i < l; i++)
+    {
+      if(boardThumb[i].dataset.board == board.BoardID)
+      {
+        boardThumb[i].parentNode.removeChild(boardThumb[i]);
+        break;
+      }
+    }
+    for(var i = 0, l = boardInfo.length; i < l; i++)
+    {
+      if(boardInfo[i]._id == board.BoardID)
+      {
+        boardInfo.splice(i, 1);
+        break;
+      }
+    }
+
+    if(boardInfo.length == 0)
+    {
+      this.newBoardClick(this, null);
+    }
+  },
+  deleteBoardClick: function(context, e)
+  {
+    this.socket.emit('deleteBoard', { "UserID": userInfo.userId, "BoardID": this.boardId });
+  },
+  newBoardClick: function(context, e)
+  {
+    this.socket.emit('newBoard', { "UserID": userInfo.userId });
   },
   paletteClick: function(context, e)
   {
@@ -402,6 +590,7 @@ whiteboard.prototype = {
     var body = document.getElementsByTagName('body')[0];
     var header = document.getElementsByTagName('header')[0];
     var board = document.getElementById('board');
+    var userBoards = document.getElementById('userBoards');
     var palette = document.getElementById('palette');
 
     try

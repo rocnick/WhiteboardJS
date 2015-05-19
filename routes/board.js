@@ -20,6 +20,12 @@ module.exports = {
       callback(boardCollection);
     }
   },
+  insert: function(data, callback)
+  {
+    var newBoard = new board(null, data.UserID, null);
+
+    newBoard.insert(callback);
+  },
   upsert: function(data)
   {
     if(typeof data === 'undefined' || data === null)
@@ -37,8 +43,10 @@ module.exports = {
     //console.log(dbBoard);
     dbBoard.upsert();
   },
-  createBoard: function()
+  delete: function(data, callback)
   {
-    //
+    var delBoard = new board(data.BoardID, data.UserID, null);
+    
+    delBoard.delete(callback);
   }
 };

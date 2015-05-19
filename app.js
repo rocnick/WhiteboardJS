@@ -16,6 +16,7 @@ var signup = require('./routes/signup');
 var login = require('./routes/login');
 var logout = require('./routes/logout');
 var board = require('./routes/board');
+var connectedUsers = [];
 
 var app = express();
 
@@ -76,6 +77,19 @@ io.on('connection', function(socket) {
   socket.on('requestBoards', function(data) {
     board.deliver(data, function(results) {
         socket.emit('boards', results);
+    });
+  });
+  socket.on('newBoard', function(data) {
+    board.insert(data, function(result) {
+        if(result)
+        {
+            socket.emit('createdBoard', result[0]);
+        }
+    });
+  });
+  socket.on('deleteBoard', function(data) {
+    board.delete(data, function(result) {
+        socket.emit('deletionResponse', result);
     });
   });
   socket.on('inboundBoard', function (data) {
