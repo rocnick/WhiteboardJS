@@ -106,6 +106,7 @@ whiteboard.prototype = {
 
         del.setAttribute('class', 'deleteBoard');
         del.addEventListener('click', function(e) {
+          console.log('hmm');
           context.deleteBoardClick(this, e);
         });
 
@@ -153,8 +154,9 @@ whiteboard.prototype = {
   {
     var selectedBoard = context.dataset.board;
     var activeThumbs = document.getElementsByClassName('boardThumb');
+    var i, l;
 
-    for(var i = 0, l = activeThumbs.length; i < l; i++)
+    for(i = 0, l = activeThumbs.length; i < l; i++)
     {
       if(activeThumbs[i].getAttribute('class').indexOf('activeBoard') != -1)
       {
@@ -169,7 +171,7 @@ whiteboard.prototype = {
 
     this.boardId = selectedBoard;
 
-    for(var i = 0, l = boardInfo.length; i < l; i++)
+    for(i = 0, l = boardInfo.length; i < l; i++)
     {
       if(boardInfo[i]._id == selectedBoard)
       {
@@ -220,6 +222,8 @@ whiteboard.prototype = {
   },
   finalizeDeletion: function(board)
   {
+    var i, l;
+
     if(this.boardId == board.BoardID)
     {
       var staleBoard = document.getElementById('board');
@@ -228,7 +232,7 @@ whiteboard.prototype = {
 
     var boardThumb = document.getElementsByClassName('boardThumb');
 
-    for(var i = 0, l = boardThumb.length; i < l; i++)
+    for(i = 0, l = boardThumb.length; i < l; i++)
     {
       if(boardThumb[i].dataset.board == board.BoardID)
       {
@@ -236,7 +240,7 @@ whiteboard.prototype = {
         break;
       }
     }
-    for(var i = 0, l = boardInfo.length; i < l; i++)
+    for(i = 0, l = boardInfo.length; i < l; i++)
     {
       if(boardInfo[i]._id == board.BoardID)
       {
@@ -245,7 +249,7 @@ whiteboard.prototype = {
       }
     }
 
-    if(boardInfo.length == 0)
+    if(boardInfo.length === 0)
     {
       this.newBoardClick(this, null);
     }
