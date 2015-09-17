@@ -74,28 +74,7 @@ app.use(function(err, req, res, next) {
 
 // Handling the socket communication
 io.on('connection', function(socket) {
-  socket.on('requestBoards', function(data) {
-    board.deliver(data, function(results) {
-        socket.emit('boards', results);
-    });
-  });
-  socket.on('newBoard', function(data) {
-    board.insert(data, function(result) {
-        if(result)
-        {
-            socket.emit('createdBoard', result[0]);
-        }
-    });
-  });
-  socket.on('deleteBoard', function(data) {
-    board.delete(data, function(result) {
-        socket.emit('deletionResponse', result);
-    });
-  });
-  socket.on('inboundBoard', function (data) {
-    if(data.commit)
-        board.upsert(data);
-  });
+  var socketHandle = require('./socketHandler')(socket);
 });
 
 var serverPort = (process.env.PORT || 1092);

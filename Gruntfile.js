@@ -31,9 +31,12 @@ module.exports = function(grunt)
     },
     jshint: {
       files: [
-        './Gruntfile.js',
-        './public/javascripts/*.js',
         './app.js',
+        './Gruntfile.js',
+        './socketHandler.js',
+        './controllers/*.js',
+        './dal/*.js',
+        './public/javascripts/*.js',
         './routes/*.js',
         '!./public/javascripts/*angular*.js',
         '!./public/javascripts/*d3*.js',
@@ -50,12 +53,13 @@ module.exports = function(grunt)
     watch: {
       scripts: {
         files: [
-          './Gruntfile.js',
-          './public/javascripts/*.js',
           './app.js',
-          './routes/*.js',
+          './Gruntfile.js',
+          './socketHandler.js',
           './controllers/*.js',
           './dal/*.js',
+          './public/javascripts/*.js',
+          './routes/*.js',
           '!*.sql'
         ],
         tasks: ['default'],

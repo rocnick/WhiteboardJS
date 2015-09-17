@@ -15,7 +15,7 @@ function Signup()
   this.invalid = false;
   this.errors = [];
 
-  if(this.form == null || this.hasEmpty() || this.isInvalid())
+  if(this.form === null || this.hasEmpty() || this.isInvalid())
   {
     return errors;
   }
@@ -54,7 +54,7 @@ Signup.prototype = {
   hasEmpty: function() {
     for(var i = 0, l = this.form.length; i < l; i++)
     {
-      if(this.form[i] == '')
+      if(this.form[i] === '')
       {
         this.errors.push('Please fill out the form completely');
         return true;
@@ -66,37 +66,37 @@ Signup.prototype = {
   isInvalid: function() {
     var toReturn = false;
 
-    if(this.form.fName == '')
+    if(this.form.fName === '')
     {
       toReturn = true;
       this.errors.push('Please enter a First Name');
     }
-    if(this.form.lName == '')
+    if(this.form.lName === '')
     {
       toReturn = true;
       this.errors.push('Please enter a Last Name');
     }
-    if(this.form.username == '')
+    if(this.form.username === '')
     {
       toReturn = true;
       this.errors.push('Please enter a Username');
     }
-    if(this.form.email == '')
+    if(this.form.email === '')
     {
       toReturn = true;
       this.errors.push('Please enter an Email Address');
     }
-    if(this.form.password == '')
+    if(this.form.password === '')
     {
       toReturn = true;
       this.errors.push('Please enter a password');
     }
-    if(this.form.password2 == '')
+    if(this.form.password2 === '')
     {
       toReturn = true;
       this.errors.push('Please confirm your password');
     }
-    if(this.form.password != this.form.password2)
+    if(this.form.password !== this.form.password2)
     {
       toReturn = true;
       this.errors.push('Please ensure your passwords match');

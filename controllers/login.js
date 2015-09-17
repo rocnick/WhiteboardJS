@@ -12,7 +12,7 @@ function Login()
   this.invalid = false;
   this.errors = [];
 
-  if(this.form == null || this.hasEmpty() || this.isInvalid())
+  if(this.form === null || this.hasEmpty() || this.isInvalid())
   {
     res.render('login', { title: 'WhiteboardJS' });
   }
@@ -55,7 +55,7 @@ Login.prototype = {
   hasEmpty: function() {
     for(var i = 0, l = this.form.length; i < l; i++)
     {
-      if(this.form[i] == '')
+      if(this.form[i] === '')
       {
         this.errors.push('Please fill out the form completely');
         return true;
@@ -67,12 +67,12 @@ Login.prototype = {
   isInvalid: function() {
     var toReturn = false;
 
-    if(this.form.email == '')
+    if(this.form.email === '')
     {
       toReturn = true;
       this.errors.push('Please enter a valid Email Address');
     }
-    if(this.form.password == '')
+    if(this.form.password === '')
     {
       toReturn = true;
       this.errors.push('Please enter a password');

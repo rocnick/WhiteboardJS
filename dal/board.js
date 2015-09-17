@@ -1,6 +1,5 @@
 var mysql = require('mysql');
-var mongo = require('mongodb').MongoClient
-  , assert = require('assert');
+var mongo = require('mongodb').MongoClient, assert = require('assert');
 var mysqlCredentials = require(__dirname + '/dbcredentials'),
     dbCredentials = new mysqlCredentials();
 var monCredentials = require(__dirname + '/mongocredentials'),
@@ -14,11 +13,11 @@ var db = mysql.createConnection({
 
 module.exports = Board;
 
-function Board()
+function Board(data)
 {
-    this.BoardID = (typeof arguments[0] !== 'undefined') ? arguments[0] : null;
-    this.UserID = (typeof arguments[1] !== 'undefined') ? arguments[1] : null;
-    this.BoardContent = (typeof arguments[2] !== 'undefined') ? arguments[2] : null;
+    this.BoardID = (typeof data.BoardID !== 'undefined') ? data.BoardID : null;
+    this.UserID = (typeof data.UserID !== 'undefined') ? data.UserID : null;
+    this.BoardContent = (typeof data.BoardContent !== 'undefined') ? data.BoardContent : null;
     this.BoardCollection = null;
 }
 
@@ -100,7 +99,7 @@ Board.prototype = {
 
                 callback(result);
             });
-        })
+        });
     },
     insert: function(callback)
     {
@@ -144,7 +143,7 @@ Board.prototype = {
             function(err, result) {
                 cf(result);
             });
-        }
+        };
         
         db.query(sqlQuery, [this.UserID], function(err, result) {
             if(err)
@@ -213,14 +212,14 @@ Board.prototype = {
             function(err, result) {
                 cf(result);
             });
-        }
+        };
 
         if(typeof this.BoardContent === 'undefined' || this.BoardContent === null)
         {
             this.BoardContent = '';
         }
 
-        if(typeof this.BoardID === 'undefined' || this.BoardID == null)
+        if(typeof this.BoardID === 'undefined' || this.BoardID === null)
         {
             this.insert(function() {  });
         }
@@ -238,8 +237,8 @@ Board.prototype = {
     },
     delete: function(callback)
     {
-        if((typeof this.BoardID === 'undefined' || this.BoardID === null)
-            || (typeof this.UserID === 'undefined' || this.UserID === null))
+        if((typeof this.BoardID === 'undefined' || this.BoardID === null) ||
+           (typeof this.UserID === 'undefined' || this.UserID === null))
         {
             if(typeof callback === 'function')
             {
@@ -264,7 +263,7 @@ Board.prototype = {
             function(err, result) {
                 cf(result);
             });
-        }
+        };
 
         db.query(sqlQuery, [this.BoardID, this.UserID], function(err, result) {
             if(err)

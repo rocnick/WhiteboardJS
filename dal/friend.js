@@ -21,7 +21,7 @@ function User()
 User.prototype = {
     fetch: function(callback)
     {
-        if(typeof this.UserID1 === 'undefined' || this.UserID1 == null)
+        if(typeof this.UserID1 === 'undefined' || this.UserID1 === null)
         {
             if(typeof callback === 'function')
             {
@@ -62,11 +62,11 @@ User.prototype = {
                     callback(false);
                 }
             }
-        })
+        });
     },
     fetchAll: function(callback)
     {
-        if(typeof this.UserID1 === 'undefined' || this.UserID1 == null)
+        if(typeof this.UserID1 === 'undefined' || this.UserID1 === null)
         {
             if(typeof callback === 'function')
             {
@@ -75,9 +75,9 @@ User.prototype = {
         }
 
         var context = this;
-        var sqlQuery = 'SELECT User.UserID, User.Username, User.FirstName, User.LastName, User.EmailAddress FROM User INNER JOIN Friend ON (User.UserID = Friend.UserID2) WHERE Friend.UserID1 = ?'
-                       + 'UNION'
-                       + 'SELECT User.UserID, User.Username, User.FirstName, User.LastName, User.EmailAddress FROM User INNER JOIN Friend ON (User.UserID = Friend.UserID1) WHERE Friend.UserID2 = ?';
+        var sqlQuery = 'SELECT User.UserID, User.Username, User.FirstName, User.LastName, User.EmailAddress FROM User INNER JOIN Friend ON (User.UserID = Friend.UserID2) WHERE Friend.UserID1 = ?' +
+                       'UNION' +
+                       'SELECT User.UserID, User.Username, User.FirstName, User.LastName, User.EmailAddress FROM User INNER JOIN Friend ON (User.UserID = Friend.UserID1) WHERE Friend.UserID2 = ?';
 
         db.connect();
         
@@ -117,8 +117,8 @@ User.prototype = {
     },
     insert: function(callback)
     {
-        if((typeof this.UserID1 === 'undefined' || this.UserID1 == null)
-            || (typeof this.UserID2 === 'undefined' || this.UserID2 == null))
+        if((typeof this.UserID1 === 'undefined' || this.UserID1 === null) ||
+           (typeof this.UserID2 === 'undefined' || this.UserID2 === null))
         {
             if(typeof callback === 'function')
             {
@@ -161,7 +161,7 @@ User.prototype = {
     },
     delete: function()
     {
-        if(typeof this.UserID1 === 'undefined' || this.UserID1 == null)
+        if(typeof this.UserID1 === 'undefined' || this.UserID1 === null)
         {
             if(typeof callback === 'function')
             {

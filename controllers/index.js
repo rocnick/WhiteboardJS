@@ -13,7 +13,8 @@ function Whiteboard()
   this.userBoards = null;
   this.userInfo = (typeof req.cookies.wbUser !== 'undefined') ? req.cookies.wbUser.userId : 'undefined';
 
-  this.getBoards(this.userInfo);
+  this.showIndex();
+  //this.getBoards(this.userInfo);
 }
 
 Whiteboard.prototype = {
@@ -49,7 +50,7 @@ Whiteboard.prototype = {
     var callback = function(result) {
       context.userBoards = result;
 
-      if(!result || result.length == 0)
+      if(!result || result.length === 0)
       {
         context.createFreshBoard(userId, function(result) {
           context.userBoards = result;

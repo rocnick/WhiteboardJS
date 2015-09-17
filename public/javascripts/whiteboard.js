@@ -29,10 +29,22 @@ var whiteboard = function() {
     sitePort = parseInt(siteInfo[1]) + 1;
   }
 
+  // Configure socket and initialize board data
   this.socket = io('http://' + siteHost + ':' + sitePort);
   
   this.socket.on('boards', function (data) {
-    console.log(data);
+    var boardInfo = (data !== null) ? data : [];
+    context.init(boardInfo);
+  });
+  this.socket.on('polygons', function (data) {
+    var polygonInfo = (data !== null) ? data : [];
+    var polygons = '';
+
+    for (var i = 0, l = polygonInfo.length; i < l; i++) {
+      polygons += polygonInfo[i].Polygon;
+    }
+
+    document.getElementById('board').innerHTML = '<svg>' + polygons + '</svg>';
   });
   this.socket.on('createdBoard', function(data) {
     context.addCreatedBoard(data);
@@ -40,6 +52,7 @@ var whiteboard = function() {
   this.socket.on('deletionResponse', function(data) {
     context.finalizeDeletion(data);
   });
+  this.socket.emit('requestBoards', { "UserID": userInfo.userId });
 
   window.onresize = document.getElementsByTagName('body')[0].onload = this.resizeWorkspace;
 
@@ -68,23 +81,20 @@ var whiteboard = function() {
       context.boardMouseUp(this, e);
     }, false);
   }
-
-  this.init();
 };
 
 whiteboard.prototype = {
-  init: function()
+  init: function(boardInfo)
   {
     var context = this;
 
-    if(typeof boardInfo[0] !== 'undefined' && boardInfo[0] !== null && boardInfo[0] != 'undefined')
+    if(boardInfo.length > 0 && typeof boardInfo[0] !== 'undefined' && boardInfo[0] !== null && boardInfo[0] != 'undefined')
     {
       // We are going to take the first board and make it the working board
       if(typeof boardInfo[0]._id !== 'undefined' && boardInfo[0]._id !== null && boardInfo[0]._id !== 'undefined')
       {
         this.boardId = boardInfo[0]._id;
-        var board = document.getElementById('board');
-        board.innerHTML = '<svg>' + boardInfo[0].Board + '</svg>';
+        this.socket.emit('requestPolygons', { BoardID: this.boardId });
       }
     }
 
@@ -580,14 +590,20 @@ whiteboard.prototype = {
         return;
       }
 
-      var data = {
-        "BoardID": context.boardId,
-        "UserID": userInfo.userId,
-        "Board": element.innerHTML,
-        "commit": !context.mouse.down
-      };
-      context.socket.emit('inboundBoard', data);
+      context.commitPolygon(context, element);
     }
+  },
+  commitPolygon: function(context, element)
+  {
+    var polygon = document.getElementById(context.currentDraw).outerHTML;
+    var data = {
+      "BoardID": context.boardId,
+      "PolygonID": context.currentDraw,
+      "UserID": userInfo.userId,
+      "Polygon": polygon,
+      "commit": !context.mouse.down
+    };
+    context.socket.emit('inboundPolygon', data);
   },
   resizeWorkspace: function()
   {

@@ -7,6 +7,5 @@ whiteboardApp.controller('wbCtrl', function($scope) {
   {
     $scope.loggedIn = true;
     $scope.userInfo = userInfo;
-    $scope.boardInfo = boardInfo;
   }
 });

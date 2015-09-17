@@ -23,7 +23,7 @@ function User()
 User.prototype = {
     fetch: function(callback)
     {
-        if(typeof this.UserID === 'undefined' || this.UserID == null)
+        if(typeof this.UserID === 'undefined' || this.UserID === null)
         {
             if(typeof callback === 'function')
             {
@@ -68,8 +68,8 @@ User.prototype = {
     },
     login: function(callback)
     {
-        if((typeof this.EmailAddress === 'undefined' || this.EmailAddress == null)
-            || (typeof this.Password === 'undefined' || this.Password == null))
+        if((typeof this.EmailAddress === 'undefined' || this.EmailAddress === null) ||
+           (typeof this.Password === 'undefined' || this.Password === null))
         {
             if(typeof callback === 'function')
             {
@@ -115,11 +115,11 @@ User.prototype = {
     },
     insert: function(callback)
     {
-        if((typeof this.Username === 'undefined' || this.Username == null)
-            || (typeof this.Password === 'undefined' || this.Password == null)
-            || (typeof this.FirstName === 'undefined' || this.FirstName == null)
-            || (typeof this.LastName === 'undefined' || this.LastName == null)
-            || (typeof this.EmailAddress === 'undefined' || this.EmailAddress == null))
+        if((typeof this.Username === 'undefined' || this.Username === null) ||
+           (typeof this.Password === 'undefined' || this.Password === null) ||
+           (typeof this.FirstName === 'undefined' || this.FirstName === null) ||
+           (typeof this.LastName === 'undefined' || this.LastName === null) ||
+           (typeof this.EmailAddress === 'undefined' || this.EmailAddress === null))
         {
             if(typeof callback === 'function')
             {
@@ -142,7 +142,7 @@ User.prototype = {
             console.log(result);
             if(typeof result.insertId !== 'undefined')
             {
-                context.UserID = result.insertId
+                context.UserID = result.insertId;
                 if(typeof callback === 'function')
                 {
                     callback(result.insertId);
@@ -159,12 +159,12 @@ User.prototype = {
     },
     update: function(callback)
     {
-        if((typeof this.UserID === 'undefined' || this.UserID == null)
-            || (typeof this.Username === 'undefined' || this.Username == null)
-            || (typeof this.Password === 'undefined' || this.Password == null)
-            || (typeof this.FirstName === 'undfined' || this.FirstName == null)
-            || (typeof this.LastName === 'undefined' || this.LastName == null)
-            || (typeof this.EmailAddress === 'undefined' || this.EmailAddress == null))
+        if((typeof this.UserID === 'undefined' || this.UserID === null) ||
+           (typeof this.Username === 'undefined' || this.Username === null) ||
+           (typeof this.Password === 'undefined' || this.Password === null) ||
+           (typeof this.FirstName === 'undefined' || this.FirstName === null) ||
+           (typeof this.LastName === 'undefined' || this.LastName === null) ||
+           (typeof this.EmailAddress === 'undefined' || this.EmailAddress === null))
         {
             if(typeof callback === 'function')
             {
@@ -202,7 +202,7 @@ User.prototype = {
     },
     delete: function(callback)
     {
-        if(typeof this.UserID === 'undefined' || this.UserID == null)
+        if(typeof this.UserID === 'undefined' || this.UserID === null)
         {
             if(typeof callback === 'function')
             {

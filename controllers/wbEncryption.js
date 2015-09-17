@@ -32,4 +32,4 @@ module.exports = {
         return this.reverse(str.slice(1)) + str.charAt(0);
     }
   }  
-}
+};
