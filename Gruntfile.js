@@ -60,6 +60,7 @@ module.exports = function(grunt)
           './dal/*.js',
           './public/javascripts/*.js',
           './routes/*.js',
+          './views/*',
           '!*.sql'
         ],
         tasks: ['default'],

@@ -157,6 +157,8 @@ form#login input {
   height: 25px;
   width: 240px;
   border-radius: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 form#signup input:nth-last-child(1),
 form#login input:nth-last-child(1) {

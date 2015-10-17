@@ -1,15 +1,7 @@
-var mysql = require('mysql');
+
 var mongo = require('mongodb').MongoClient, assert = require('assert');
-var mysqlCredentials = require(__dirname + '/dbcredentials'),
-    dbCredentials = new mysqlCredentials();
 var monCredentials = require(__dirname + '/mongocredentials'),
     mongoCredentials = new monCredentials();
-var db = mysql.createConnection({
-    user: dbCredentials.user,
-    password: dbCredentials.password,
-    host: dbCredentials.host,
-    database: dbCredentials.database
-});
 
 module.exports = Polygon;
 
@@ -17,8 +9,14 @@ function Polygon(data)
 {
     this.BoardID = (typeof data.BoardID !== 'undefined') ? data.BoardID : null;
     this.PolygonID = (typeof data.PolygonID !== 'undefined') ? data.PolygonID : null;
-    this.UserID = (typeof data.UserID !== 'undefined') ? data.UserID : null;
+    this.UserID = (typeof data.UserID !== 'undefined') ? parseInt(data.UserID) : null;
     this.PolygonContent = (typeof data.Polygon !== 'undefined') ? data.Polygon : null;
+    this.response = {
+      BoardID: this.BoardID,
+      PolygonID: this.PolygonID,
+      UserID: this.UserID,
+      Polygons: this.PolygonContent
+    };
 }
 
 Polygon.prototype = {
@@ -49,8 +47,12 @@ Polygon.prototype = {
 
       gatherPolygons(db, function(result) {
         db.close();
+        
+        // Wrap the result in the result object
+        context.response.Polygons = result;
+
         if (typeof callback === 'function') {
-          callback(result);
+          callback(context.response);
         }
       });
     });
@@ -79,7 +81,7 @@ Polygon.prototype = {
     {
       // Insert the object into the collection
       var polygonCollection = db.collection('polygons');
-
+      
       polygonCollection.update({
         "_id": context.PolygonID,
         "BoardID": context.BoardID,
@@ -105,7 +107,6 @@ Polygon.prototype = {
 
       upsertPolygon(db, function(result, callback) {
         db.close();
-        console.log('hmm');
       });
     });
   }

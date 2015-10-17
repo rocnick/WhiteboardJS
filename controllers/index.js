@@ -13,8 +13,7 @@ function Whiteboard()
   this.userBoards = null;
   this.userInfo = (typeof req.cookies.wbUser !== 'undefined') ? req.cookies.wbUser.userId : 'undefined';
 
-  this.showIndex();
-  //this.getBoards(this.userInfo);
+  this.getBoards(this.userInfo);
 }
 
 Whiteboard.prototype = {
@@ -30,14 +29,9 @@ Whiteboard.prototype = {
       userBoards: boardCollection
     });
   },
-  createFreshBoard: function(userId, callback)
-  {
-    var newBoard = new board(null, userId, '');
-
-    newBoard.insert(callback);
-  },
   getBoards: function(userId)
   {
+    // If the user is not logged in to an account, just give them a base board to draw on
     if(typeof userId === 'undefined' || userId === 'undefined' || userId === null)
     {
       this.userBoards = 'undefined';
@@ -47,26 +41,18 @@ Whiteboard.prototype = {
     }
 
     var context = this;
-    var callback = function(result) {
+
+    new board({UserID: userId}).fetchAll(function(result) {
       context.userBoards = result;
 
       if(!result || result.length === 0)
       {
-        context.createFreshBoard(userId, function(result) {
+        new board({UserID: userId}).insert(function(result) {
           context.userBoards = result;
-
-          context.showIndex();
         });
       }
-      else
-      {
-        context.showIndex();
-      }
-    };
-
-    var foundBoards = new board();
-    foundBoards.UserID = userId;
-
-    foundBoards.fetchAll(callback);
+      
+      context.showIndex();
+    });
   }
 };

@@ -32,28 +32,50 @@ var whiteboard = function() {
   // Configure socket and initialize board data
   this.socket = io('http://' + siteHost + ':' + sitePort);
   
+  // Create socket listeners
   this.socket.on('boards', function (data) {
     var boardInfo = (data !== null) ? data : [];
-    context.init(boardInfo);
   });
   this.socket.on('polygons', function (data) {
-    var polygonInfo = (data !== null) ? data : [];
+    var polygonResponse = (data !== null) ? data : [];
+
+    // The polygon string to insert into the board
     var polygons = '';
 
-    for (var i = 0, l = polygonInfo.length; i < l; i++) {
-      polygons += polygonInfo[i].Polygon;
+    for (var i = 0, l = polygonResponse.Polygons.length; i < l; i++) {
+      polygons += polygonResponse.Polygons[i].Polygon;
     }
 
-    document.getElementById('board').innerHTML = '<svg>' + polygons + '</svg>';
+    if (polygonResponse.BoardID == context.boardId) {
+      document.getElementById('board').innerHTML = '<svg>' + polygons + '</svg>';
+    }
+      
+    // Gather the board thumbs and add the svg to the thumb
+    var boardThumb = document.querySelector('div[data-board=\'' + polygonResponse.BoardID + '\']');
+    boardThumb.innerHTML = '<svg width="100%" height ="100%"><g transform="scale(0.3)">' + polygons + '</g></svg>';
+
+    // The polygons have been added to the thumbnail,
+    // now let's append the delete button also
+    var del = document.createElement('div');
+    del.setAttribute('class', 'deleteBoard');
+    del.addEventListener('click', function(e) {
+      context.deleteBoardClick(this, e);
+    });
+    boardThumb.appendChild(del);
   });
   this.socket.on('createdBoard', function(data) {
-    context.addCreatedBoard(data);
+    if (data.Created) {
+      context.addCreatedBoard(data);
+    }
   });
   this.socket.on('deletionResponse', function(data) {
-    context.finalizeDeletion(data);
+    if (data.Deleted) {
+      context.finalizeDeletion(data);
+    }
   });
-  this.socket.emit('requestBoards', { "UserID": userInfo.userId });
+  context.init();
 
+  // Handle resizing page both on load and whenever window resized by user
   window.onresize = document.getElementsByTagName('body')[0].onload = this.resizeWorkspace;
 
   // Attach click handlers to palette buttons
@@ -84,7 +106,7 @@ var whiteboard = function() {
 };
 
 whiteboard.prototype = {
-  init: function(boardInfo)
+  init: function()
   {
     var context = this;
 
@@ -94,7 +116,6 @@ whiteboard.prototype = {
       if(typeof boardInfo[0]._id !== 'undefined' && boardInfo[0]._id !== null && boardInfo[0]._id !== 'undefined')
       {
         this.boardId = boardInfo[0]._id;
-        this.socket.emit('requestPolygons', { BoardID: this.boardId });
       }
     }
 
@@ -112,14 +133,8 @@ whiteboard.prototype = {
       for(var i = 0, l = boardInfo.length; i < l; i++)
       {
         var bp = document.createElement('div');
-        var del = document.createElement('div');
 
-        del.setAttribute('class', 'deleteBoard');
-        del.addEventListener('click', function(e) {
-          console.log('hmm');
-          context.deleteBoardClick(this, e);
-        });
-
+        // Create the view of the board thumbnail
         bp.style.width = '150px';
         bp.style.height = '90px';
         bp.style.borderWidth = '1px';
@@ -129,18 +144,20 @@ whiteboard.prototype = {
         bp.setAttribute('class', 'boardThumb');
         bp.setAttribute('data-board', boardInfo[i]._id);
 
+        // Add the listener to choose this board to work on
         bp.addEventListener('click', function(e) {
           context.selectBoard(this, e);
         });
 
+        // If this is the currently selected board, make it active
         if(boardInfo[i]._id == context.boardId)
         {
           bp.setAttribute('class', bp.getAttribute('class') + ' activeBoard');
         }
 
-        bp.innerHTML = '<svg width="100%" height ="100%"><g transform="scale(0.3)">' + boardInfo[i].Board + '</g></svg>';
+        // Make a request over the socket for the polygons of this board
+        context.socket.emit('requestPolygons', { BoardID: boardInfo[i]._id });
 
-        bp.appendChild(del);
         $('#userBoards').append(bp);
       }
 
@@ -176,20 +193,13 @@ whiteboard.prototype = {
       if(activeThumbs[i].dataset.board == selectedBoard)
       {
         activeThumbs[i].setAttribute('class', activeThumbs[i].getAttribute('class') + ' activeBoard');
+        var svgContainer = activeThumbs[i].children[0];
+        var svgContent = svgContainer.children[0].innerHTML;
+        document.getElementById('board').innerHTML = '<svg>' + svgContent + '</svg>';
       }
     }
 
     this.boardId = selectedBoard;
-
-    for(i = 0, l = boardInfo.length; i < l; i++)
-    {
-      if(boardInfo[i]._id == selectedBoard)
-      {
-        var staleBoard = document.getElementById('board');
-        staleBoard.innerHTML = '<svg>' + boardInfo[i].Board + '</svg>';
-        break;
-      }
-    }
   },
   addCreatedBoard: function(board)
   {
@@ -234,39 +244,33 @@ whiteboard.prototype = {
   {
     var i, l;
 
-    if(this.boardId == board.BoardID)
-    {
-      var staleBoard = document.getElementById('board');
-      staleBoard.innerHTML = '<svg></svg>';
-    }
-
-    var boardThumb = document.getElementsByClassName('boardThumb');
+    var boardThumb = document.querySelectorAll('div[data-board]');
 
     for(i = 0, l = boardThumb.length; i < l; i++)
     {
       if(boardThumb[i].dataset.board == board.BoardID)
       {
+        // Removing this is going to leave us boardless; create a new one
+        if (boardThumb.length == 1) {
+          this.newBoardClick(this, null);
+        } else if (board.BoardID == this.boardId) {   // THIS IS NOT WORKING -- FIX --
+          var boardToClick = (i != 0) ? 0 : 1;
+          boardThumb[boardToClick].click();
+        }
+
         boardThumb[i].parentNode.removeChild(boardThumb[i]);
         break;
       }
     }
-    for(i = 0, l = boardInfo.length; i < l; i++)
-    {
-      if(boardInfo[i]._id == board.BoardID)
-      {
-        boardInfo.splice(i, 1);
-        break;
-      }
-    }
-
-    if(boardInfo.length === 0)
-    {
-      this.newBoardClick(this, null);
-    }
   },
   deleteBoardClick: function(context, e)
   {
-    this.socket.emit('deleteBoard', { "UserID": userInfo.userId, "BoardID": this.boardId });
+    // We don't want the event to bubble to the parent
+    e.stopPropagation();
+
+    // Go ahead and send the delete request
+    var selectedBoardId = context.parentNode.dataset.board;
+    this.socket.emit('deleteBoard', { "UserID": userInfo.userId, "BoardID": selectedBoardId });
   },
   newBoardClick: function(context, e)
   {
@@ -322,6 +326,26 @@ whiteboard.prototype = {
     }
   },
   draw: {
+    createId: function(context, board) {
+      var eleId = 'wbE-';
+      var nextEleNum = 0;
+
+      if (board.children[0].children.length > 0) {
+        var lastEleId = board.children[0].children[board.children[0].children.length-1].id;
+        var eleParts = lastEleId.split('-');
+        nextEleNum = parseInt(eleParts[eleParts.length-1]) + 1;
+      }
+      
+      if (typeof context.boardId !== 'undefined' && context.boardId !== null) {
+        eleId += context.boardId + '-';
+      }
+
+      if (typeof userInfo.userId !== 'undefined' && userInfo.userId !== null) {
+        eleId += userInfo.userId + '-';
+      }
+
+      return eleId += nextEleNum;
+    },
     brush: {
       act: function(context, board, e)
       {
@@ -340,7 +364,7 @@ whiteboard.prototype = {
         var strokeColor = document.getElementById('drawStrokeColor').value;
         var strokeWidth = document.getElementById('drawStrokeWidth').value;
         var strokeOpacity = parseInt(document.getElementById('drawStrokeOpacity').value) / 100;
-        context.currentDraw = 'wbE' + board.children[0].children.length;
+        context.currentDraw = context.draw.createId(context, board);
 
         ele.setAttribute('id', context.currentDraw);
         ele.setAttribute('points', currentPoint);
@@ -382,7 +406,7 @@ whiteboard.prototype = {
         var strokeColor = document.getElementById('drawStrokeColor').value;
         var strokeWidth = document.getElementById('drawStrokeWidth').value;
         var strokeOpacity = parseInt(document.getElementById('drawStrokeOpacity').value) / 100;
-        context.currentDraw = 'wbE' + board.children[0].children.length;
+        context.currentDraw = context.draw.createId(context, board);
 
         ele.setAttribute('id', context.currentDraw);
         ele.setAttribute('points', currentPoint);
@@ -465,7 +489,7 @@ whiteboard.prototype = {
         var strokeOpacity = parseInt(document.getElementById('drawStrokeOpacity').value) / 100;
         var fillColor = document.getElementById('drawFillColor').value;
         var fillOpacity = parseInt(document.getElementById('drawFillOpacity').value) / 100;
-        context.currentDraw = 'wbE' + board.children[0].children.length;
+        context.currentDraw = context.draw.createId(context, board);
 
         ele.setAttribute('id', context.currentDraw);
         ele.setAttribute('x', startPoint[0]);
@@ -527,7 +551,7 @@ whiteboard.prototype = {
         var strokeOpacity = parseInt(document.getElementById('drawStrokeOpacity').value) / 100;
         var fillColor = document.getElementById('drawFillColor').value;
         var fillOpacity = parseInt(document.getElementById('drawFillOpacity').value) / 100;
-        context.currentDraw = 'wbE' + board.children[0].children.length;
+        context.currentDraw = context.draw.createId(context, board);
 
         ele.setAttribute('id', context.currentDraw);
         ele.setAttribute('cx', startPoint[0]);
@@ -583,6 +607,7 @@ whiteboard.prototype = {
     },
     redraw: function(context, element)
     {
+      // Commit the work to the main board
       element.innerHTML = element.innerHTML;
       
       if((typeof userInfo === 'undefined' || userInfo === null) || (typeof userInfo.userId === 'undefined' || userInfo.userId === null))
@@ -603,6 +628,7 @@ whiteboard.prototype = {
       "Polygon": polygon,
       "commit": !context.mouse.down
     };
+    console.dir(data);
     context.socket.emit('inboundPolygon', data);
   },
   resizeWorkspace: function()

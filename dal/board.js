@@ -1,76 +1,27 @@
-var mysql = require('mysql');
 var mongo = require('mongodb').MongoClient, assert = require('assert');
-var mysqlCredentials = require(__dirname + '/dbcredentials'),
-    dbCredentials = new mysqlCredentials();
+var ObjectId = require('mongodb').ObjectID;
 var monCredentials = require(__dirname + '/mongocredentials'),
     mongoCredentials = new monCredentials();
-var db = mysql.createConnection({
-    user: dbCredentials.user,
-    password: dbCredentials.password,
-    host: dbCredentials.host,
-    database: dbCredentials.database
-});
 
 module.exports = Board;
 
-function Board(data)
-{
+function Board(data) {
     this.BoardID = (typeof data.BoardID !== 'undefined') ? data.BoardID : null;
-    this.UserID = (typeof data.UserID !== 'undefined') ? data.UserID : null;
-    this.BoardContent = (typeof data.BoardContent !== 'undefined') ? data.BoardContent : null;
+    this.UserID = (typeof data.UserID !== 'undefined') ? parseInt(data.UserID) : null;
     this.BoardCollection = null;
+    this.response = {
+        BoardID: this.BoardID,
+        UserID: this.UserID,
+        BoardContent: this.BoardContent,
+        Deleted: false,
+        Created: false
+    };
 }
 
 Board.prototype = {
-    fetch: function(callback)
-    {
-        if(typeof this.BoardID === 'undefined' || this.BoardID === null)
-        {
-            if(typeof callback === 'function')
-            {
-                callback(false);
-            }
-            return;
-        }
-
-        var context = this;
-        var sqlQuery = 'SELECT BoardID, UserID FROM Board WHERE BoardID = ?';
-        
-        var toReturn = db.query(sqlQuery, [this.BoardID], function(err, result) {
-            if(err)
-            {
-                if(typeof callback === 'function')
-                {
-                    callback(false);
-                }
-                return;
-            }
-
-            if(result.length > 0)
-            {
-                context.UserID = result[0].UserID;
-                context.BoardID = result[0].BoardID;
-
-                if(typeof callback === 'function')
-                {
-                    callback(true);
-                }
-            }
-            else
-            {
-                if(typeof callback === 'function')
-                {
-                    callback(false);
-                }
-            }
-        });
-    },
-    fetchAll: function(callback)
-    {
-        if(typeof this.UserID === 'undefined' || this.UserID === null)
-        {
-            if(typeof callback === 'function')
-            {
+    fetchAll: function(callback) {
+        if (typeof this.UserID === 'undefined' || this.UserID === null) {
+            if (typeof callback === 'function') {
                 callback([]);
             }
             return;
@@ -79,8 +30,7 @@ Board.prototype = {
         var context = this;
         var url = mongoCredentials.getUrl();
 
-        var gatherBoards = function(db, cf)
-        {
+        var gatherBoards = function(db, cf) {
             // Gather the documents
             var boardCollection = db.collection('boards');
             boardCollection.find({
@@ -101,209 +51,82 @@ Board.prototype = {
             });
         });
     },
-    insert: function(callback)
-    {
-        if((typeof this.UserID === 'undefined' || this.UserID === null))
-        {
-            if(typeof callback === 'function')
-            {
-                console.log('it is getting kicked out');
-                callback(false);
-                return;
+    insert: function(callback) {
+        if ((typeof this.UserID === 'undefined' || this.UserID === null)) {
+            if (typeof callback === 'function') {
+                callback(this.response);
             }
+            return;
         }
 
-        if (typeof this.BoardContent === 'undefined' || this.BoardContent === null)
-        {
-            this.BoardContent = '';
+        if (typeof this.BoardContent === 'undefined' || this.BoardContent === null) {
+            this.response.BoardContent = this.BoardContent = '';
         }
 
         var context = this;
-        var sqlQuery = 'INSERT INTO Board (UserID) VALUES(?)';
-
         var url = mongoCredentials.getUrl();
 
-        var insertBoard = function(db, cf)
-        {
-          // Insert the object into the collection
-          var boardCollection = db.collection('boards');
+        var insertBoard = function(db, cf) {
+            // Define the collection to use
+            var boardCollection = db.collection('boards');
 
-          boardCollection.update({
-                "_id": context.BoardID,
+            boardCollection.insert({
                 "UserID": context.UserID
-            },
-            {
-                "_id": context.BoardID,
-                "UserID": context.UserID,
-                "Board": context.BoardContent
-            },
-            {
-                upsert: true
             },
             function(err, result) {
                 cf(result);
             });
         };
         
-        db.query(sqlQuery, [this.UserID], function(err, result) {
-            if(err)
-            {
-                return;
-            }
-            
-            if(typeof result.insertId !== 'undefined')
-            {
-                context.BoardID = result.insertId;
+        // Use connect method to connect to the Server 
+        mongo.connect(url, function(err, db) {
+            assert.equal(null, err);
 
-                // Use connect method to connect to the Server 
-                mongo.connect(url, function(err, db) {
-                    assert.equal(null, err);
+            insertBoard(db, function(result, cback) {
+                db.close();
+                context.response.Created = true;
+                context.response.BoardID = this.BoardID = result.insertedIds[0];
 
-                    insertBoard(db, function(result, cback) {
-                        db.close();
-
-                        context.BoardID = result.result.upserted[0]._id;
-                        var toReturn = [
-                            {
-                                "_id": context.BoardID,
-                                "UserID": context.UserID,
-                                "Board": ''
-                            }
-                        ];
-
-                        callback(toReturn);
-                    });
-                });
-            }
+                callback(context.response);
+            });
         });
     },
-    upsert: function(callback)
-    {
-        if(typeof this.UserID === 'undefined')
-        {
+    delete: function(callback) {
+        if ((typeof this.BoardID === 'undefined' || this.BoardID === null) ||
+           (typeof this.UserID === 'undefined' || this.UserID === null)) {
             if(typeof callback === 'function')
             {
-                callback(false);
+                callback(this.response);
             }
             return;
         }
 
         var context = this;
-        var mongoQuery = '';
         var url = mongoCredentials.getUrl();
 
-        var insertBoard = function(db, cf)
-        {
-          // Insert the object into the collection
-          var boardCollection = db.collection('boards');
+        var deleteBoard = function(db, cf) {
+            // Define the board collection
+            var boardCollection = db.collection('boards');
 
-          boardCollection.update({
-                "_id": context.BoardID,
+            // The actual remove query
+            boardCollection.remove({
+                "_id": new ObjectId(context.BoardID),
                 "UserID": context.UserID
-            },
-            {
-                "_id": context.BoardID,
-                "UserID": context.UserID,
-                "Board": context.BoardContent
-            },
-            {
-                upsert: true
-            },
-            function(err, result) {
+            }, function(err, result) {
                 cf(result);
             });
         };
 
-        if(typeof this.BoardContent === 'undefined' || this.BoardContent === null)
-        {
-            this.BoardContent = '';
-        }
+        // Use connect method to connect to the Server
+        mongo.connect(url, function(err, db) {
+            assert.equal(null, err);
 
-        if(typeof this.BoardID === 'undefined' || this.BoardID === null)
-        {
-            this.insert(function() {  });
-        }
-        else
-        {
-            // Use connect method to connect to the Server 
-            mongo.connect(url, function(err, db) {
-                assert.equal(null, err);
+            deleteBoard(db, function(result, cback) {
+                db.close();
+                context.response.Deleted = true;
 
-                insertBoard(db, function(result, callback) {
-                    db.close();
-                });
+                callback(context.response);
             });
-        }
-    },
-    delete: function(callback)
-    {
-        if((typeof this.BoardID === 'undefined' || this.BoardID === null) ||
-           (typeof this.UserID === 'undefined' || this.UserID === null))
-        {
-            if(typeof callback === 'function')
-            {
-                callback(false);
-            }
-            return;
-        }
-
-        var context = this;
-        var sqlQuery =  'DELETE FROM Board WHERE BoardID = ? AND UserID = ?';
-        var url = mongoCredentials.getUrl();
-
-        var deleteBoard = function(db, cf)
-        {
-          // Insert the object into the collection
-          var boardCollection = db.collection('boards');
-
-          boardCollection.remove({
-                "_id": context.BoardID,
-                "UserID": context.UserID
-            },
-            function(err, result) {
-                cf(result);
-            });
-        };
-
-        db.query(sqlQuery, [this.BoardID, this.UserID], function(err, result) {
-            if(err)
-            {
-                if(typeof callback === 'function')
-                {
-                    callback(false);
-                }
-                return;
-            }
-
-            if(result.affectedRows > 0)
-            {
-                // Use connect method to connect to the Server 
-                mongo.connect(url, function(err, db) {
-                    assert.equal(null, err);
-
-                    deleteBoard(db, function(result, cback) {
-                        db.close();
-
-                        var oldId = context.BoardID; 
-
-                        context.BoardID = null;
-                        context.UserID = null;
-
-                        if(typeof callback === 'function')
-                        {
-                            callback({ "status": true, "BoardID": oldId });
-                        }
-                    });
-                });
-            }
-            else
-            {
-                if(typeof callback === 'function')
-                {
-                    callback(false);
-                    return;
-                }
-            }
         });
     }
 };

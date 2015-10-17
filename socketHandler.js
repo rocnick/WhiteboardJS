@@ -23,8 +23,7 @@ module.exports = function(socket) {
   // Create a new board
   socket.on('newBoard', function(data) {
     new board(data).insert(function(result) {
-      if(result)
-        socket.emit('createdBoard', result[0]);
+      socket.emit('createdBoard', result);
     });
   });
 
