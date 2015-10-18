@@ -1,3 +1,6 @@
+//  Project:   Whiteboard JS
+//  Author:    Nick Snyder
+
 module.exports = Credentials;
 
 function Credentials()

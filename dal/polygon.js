@@ -1,3 +1,5 @@
+//  Project:   Whiteboard JS
+//  Author:    Nick Snyder
 
 var mongo = require('mongodb').MongoClient, assert = require('assert');
 var monCredentials = require(__dirname + '/mongocredentials'),

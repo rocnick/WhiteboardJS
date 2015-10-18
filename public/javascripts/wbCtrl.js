@@ -1,3 +1,6 @@
+//  Project:   Whiteboard JS
+//  Author:    Nick Snyder
+
 var whiteboardApp = angular.module('whiteboardApp', []);
 
 whiteboardApp.controller('wbCtrl', function($scope) {

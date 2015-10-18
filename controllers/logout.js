@@ -1,3 +1,6 @@
+//  Project:   Whiteboard JS
+//  Author:    Nick Snyder
+
 var res = null;
 
 module.exports = Logout;

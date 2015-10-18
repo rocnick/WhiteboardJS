@@ -1,5 +1,5 @@
-// Nick Snyder
-// Signup Controller
+//  Project:   Whiteboard JS
+//  Author:    Nick Snyder
 
 var wbEncryption = require(__dirname + '/wbEncryption');
 var crypto = require('crypto');

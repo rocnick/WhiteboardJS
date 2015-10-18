@@ -1,3 +1,6 @@
+//  Project:   Whiteboard JS
+//  Author:    Nick Snyder
+
 var board = require('../dal/board');
 var req = null;
 var res = null;
@@ -5,8 +8,7 @@ var viewState = null;
 
 module.exports = Whiteboard;
 
-function Whiteboard()
-{
+function Whiteboard() {
   req = (typeof arguments[0] !== 'undefined') ? arguments[0] : null;
   res = (typeof arguments[1] !== 'undefined') ? arguments[1] : null;
 
@@ -17,8 +19,7 @@ function Whiteboard()
 }
 
 Whiteboard.prototype = {
-  showIndex: function()
-  {
+  showIndex: function() {
     // Gather out the user cookie
     var userInfo = (typeof req.cookies.wbUser !== 'undefined') ? JSON.stringify(req.cookies.wbUser) : 'undefined';
     var boardCollection = (typeof this.userBoards !== 'undefined') ? JSON.stringify(this.userBoards) : 'undefined';
@@ -29,11 +30,9 @@ Whiteboard.prototype = {
       userBoards: boardCollection
     });
   },
-  getBoards: function(userId)
-  {
+  getBoards: function(userId) {
     // If the user is not logged in to an account, just give them a base board to draw on
-    if(typeof userId === 'undefined' || userId === 'undefined' || userId === null)
-    {
+    if(typeof userId === 'undefined' || userId === 'undefined' || userId === null) {
       this.userBoards = 'undefined';
 
       this.showIndex();
@@ -41,18 +40,19 @@ Whiteboard.prototype = {
     }
 
     var context = this;
+    var selector = new board({UserID: userId});
 
-    new board({UserID: userId}).fetchAll(function(result) {
+    selector.fetchAll(function(result) {
       context.userBoards = result;
 
-      if(!result || result.length === 0)
-      {
-        new board({UserID: userId}).insert(function(result) {
-          context.userBoards = result;
+      if(!result || result.length === 0) {
+        selector.insert(function(result) {
+          context.userBoards = [{ _id: result.BoardID, UserID: result.UserID }];
+          context.showIndex();
         });
+      } else {
+        context.showIndex();
       }
-      
-      context.showIndex();
     });
   }
 };

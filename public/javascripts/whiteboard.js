@@ -246,8 +246,7 @@ whiteboard.prototype = {
     boardThumb.parentNode.removeChild(boardThumb);
 
     // Ensure that there is still a selected board
-    var selectedBoard = document.querySelector('div.activeBoard');
-    if (selectedBoard === null) {
+    if (document.querySelector('div.activeBoard') === null) {
       document.querySelector('div[data-board]').click();
     }
   },
@@ -257,8 +256,7 @@ whiteboard.prototype = {
     e.stopPropagation();
 
     // Go ahead and send the delete request
-    var selectedBoardId = context.parentNode.dataset.board;
-    this.socket.emit('deleteBoard', { "UserID": userInfo.userId, "BoardID": selectedBoardId });
+    this.socket.emit('deleteBoard', { "UserID": userInfo.userId, "BoardID": context.parentNode.dataset.board });
   },
   newBoardClick: function(context, e)
   {

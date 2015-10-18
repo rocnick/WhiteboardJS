@@ -1,3 +1,6 @@
+//  Project:   Whiteboard JS
+//  Author:    Nick Snyder
+
 var mysql = require('mysql');
 var Credentials = require('dbcredentials'),
     dbCredentials = new Credentials();
