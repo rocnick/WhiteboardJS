@@ -242,25 +242,13 @@ whiteboard.prototype = {
   },
   finalizeDeletion: function(board)
   {
-    var i, l;
+    var boardThumb = document.querySelector('div[data-board=\'' + board.BoardID + '\']');
+    boardThumb.parentNode.removeChild(boardThumb);
 
-    var boardThumb = document.querySelectorAll('div[data-board]');
-
-    for(i = 0, l = boardThumb.length; i < l; i++)
-    {
-      if(boardThumb[i].dataset.board == board.BoardID)
-      {
-        // Removing this is going to leave us boardless; create a new one
-        if (boardThumb.length == 1) {
-          this.newBoardClick(this, null);
-        } else if (board.BoardID == this.boardId) {   // THIS IS NOT WORKING -- FIX --
-          var boardToClick = (i != 0) ? 0 : 1;
-          boardThumb[boardToClick].click();
-        }
-
-        boardThumb[i].parentNode.removeChild(boardThumb[i]);
-        break;
-      }
+    // Ensure that there is still a selected board
+    var selectedBoard = document.querySelector('div.activeBoard');
+    if (selectedBoard === null) {
+      document.querySelector('div[data-board]').click();
     }
   },
   deleteBoardClick: function(context, e)
