@@ -13,7 +13,7 @@ function Whiteboard() {
   res = (typeof arguments[1] !== 'undefined') ? arguments[1] : null;
 
   this.userBoards = null;
-  this.userInfo = (typeof req.cookies.wbUser !== 'undefined') ? req.cookies.wbUser.userId : 'undefined';
+  this.userInfo = (typeof req.cookies.wbUser !== 'undefined') ? req.cookies.wbUser.UserID : 'undefined';
 
   this.getBoards(this.userInfo);
 }
@@ -33,8 +33,6 @@ Whiteboard.prototype = {
   getBoards: function(userId) {
     // If the user is not logged in to an account, just give them a base board to draw on
     if(typeof userId === 'undefined' || userId === 'undefined' || userId === null) {
-      this.userBoards = 'undefined';
-
       this.showIndex();
       return;
     }

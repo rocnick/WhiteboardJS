@@ -8,15 +8,13 @@ var res = null;
 
 module.exports = Login;
 
-function Login()
-{
+function Login() {
   this.form = (typeof arguments[0] === 'object') ? arguments[0] : null;
   res = (typeof arguments[1] !== 'undefined') ? arguments[1] : null;
   this.invalid = false;
   this.errors = [];
 
-  if(this.form === null || this.hasEmpty() || this.isInvalid())
-  {
+  if(this.form === null || this.hasEmpty() || this.isInvalid()) {
     res.render('login', { title: 'WhiteboardJS' });
   }
 
@@ -29,25 +27,14 @@ function Login()
   var checkedUser = new User(null, null, this.form.password, null, null, this.form.email);
 
   checkedUser.login(function(result) {
-    if(!result)
-    {
+    if(!result.LoggedIn) {
       res.render('login', { title: 'WhiteboardJS' });
-    }
-    else
-    {
+    } else {
       // Generate an expiration date
       var expirationTime = 604800000; // One week in milliseconds
 
-      var userInfo = {
-        userId: checkedUser.UserID,
-        username: checkedUser.Username,
-        first: checkedUser.FirstName,
-        last: checkedUser.LastName,
-        email: checkedUser.EmailAddress
-      };
-
       res.status(200);
-      res.cookie('wbUser', userInfo, { maxAge: expirationTime });
+      res.cookie('wbUser', result, { maxAge: expirationTime });
 
       res.redirect('/');
     }
@@ -56,10 +43,8 @@ function Login()
 
 Login.prototype = {
   hasEmpty: function() {
-    for(var i = 0, l = this.form.length; i < l; i++)
-    {
-      if(this.form[i] === '')
-      {
+    for(var i = 0, l = this.form.length; i < l; i++) {
+      if(this.form[i] === '') {
         this.errors.push('Please fill out the form completely');
         return true;
       }
@@ -70,13 +55,11 @@ Login.prototype = {
   isInvalid: function() {
     var toReturn = false;
 
-    if(this.form.email === '')
-    {
+    if(this.form.email === '') {
       toReturn = true;
       this.errors.push('Please enter a valid Email Address');
     }
-    if(this.form.password === '')
-    {
+    if(this.form.password === '') {
       toReturn = true;
       this.errors.push('Please enter a password');
     }

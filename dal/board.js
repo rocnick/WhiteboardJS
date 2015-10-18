@@ -10,7 +10,7 @@ module.exports = Board;
 
 function Board(data) {
     this.BoardID = (typeof data.BoardID !== 'undefined') ? data.BoardID : null;
-    this.UserID = (typeof data.UserID !== 'undefined') ? parseInt(data.UserID) : null;
+    this.UserID = (typeof data.UserID !== 'undefined') ? data.UserID : null;
     this.BoardCollection = null;
     this.response = {
         BoardID: this.BoardID,
@@ -75,8 +75,7 @@ Board.prototype = {
 
             boardCollection.insert({
                 "UserID": context.UserID
-            },
-            function(err, result) {
+            }, function(err, result) {
                 cf(result);
             });
         };

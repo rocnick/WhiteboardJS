@@ -11,7 +11,7 @@ function Polygon(data)
 {
     this.BoardID = (typeof data.BoardID !== 'undefined') ? data.BoardID : null;
     this.PolygonID = (typeof data.PolygonID !== 'undefined') ? data.PolygonID : null;
-    this.UserID = (typeof data.UserID !== 'undefined') ? parseInt(data.UserID) : null;
+    this.UserID = (typeof data.UserID !== 'undefined') ? data.UserID : null;
     this.PolygonContent = (typeof data.Polygon !== 'undefined') ? data.Polygon : null;
     this.response = {
       BoardID: this.BoardID,

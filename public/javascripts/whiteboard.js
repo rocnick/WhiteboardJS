@@ -110,7 +110,7 @@ whiteboard.prototype = {
   {
     var context = this;
 
-    if(boardInfo.length > 0 && typeof boardInfo[0] !== 'undefined' && boardInfo[0] !== null && boardInfo[0] != 'undefined')
+    if(boardInfo !== null && boardInfo.length > 0 && typeof boardInfo[0] !== 'undefined' && boardInfo[0] !== null && boardInfo[0] != 'undefined')
     {
       // We are going to take the first board and make it the working board
       if(typeof boardInfo[0]._id !== 'undefined' && boardInfo[0]._id !== null && boardInfo[0]._id !== 'undefined')
@@ -256,11 +256,11 @@ whiteboard.prototype = {
     e.stopPropagation();
 
     // Go ahead and send the delete request
-    this.socket.emit('deleteBoard', { "UserID": userInfo.userId, "BoardID": context.parentNode.dataset.board });
+    this.socket.emit('deleteBoard', { "UserID": userInfo.UserID, "BoardID": context.parentNode.dataset.board });
   },
   newBoardClick: function(context, e)
   {
-    this.socket.emit('newBoard', { "UserID": userInfo.userId });
+    this.socket.emit('newBoard', { "UserID": userInfo.UserID });
   },
   paletteClick: function(context, e)
   {
@@ -326,8 +326,8 @@ whiteboard.prototype = {
         eleId += context.boardId + '-';
       }
 
-      if (typeof userInfo.userId !== 'undefined' && userInfo.userId !== null) {
-        eleId += userInfo.userId + '-';
+      if (typeof userInfo.UserID !== 'undefined' && userInfo.UserID !== null) {
+        eleId += userInfo.UserID + '-';
       }
 
       return eleId += nextEleNum;
@@ -596,7 +596,7 @@ whiteboard.prototype = {
       // Commit the work to the main board
       element.innerHTML = element.innerHTML;
       
-      if((typeof userInfo === 'undefined' || userInfo === null) || (typeof userInfo.userId === 'undefined' || userInfo.userId === null))
+      if((typeof userInfo === 'undefined' || userInfo === null) || (typeof userInfo.UserID === 'undefined' || userInfo.UserID === null))
       {
         return;
       }
@@ -610,7 +610,7 @@ whiteboard.prototype = {
     var data = {
       "BoardID": context.boardId,
       "PolygonID": context.currentDraw,
-      "UserID": userInfo.userId,
+      "UserID": userInfo.UserID,
       "Polygon": polygon,
       "commit": !context.mouse.down
     };

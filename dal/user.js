@@ -10,6 +10,10 @@ var db = mysql.createConnection({
     host: dbCredentials.host,
     database: dbCredentials.database
 });
+var mongo = require('mongodb').MongoClient, assert = require('assert');
+var ObjectId = require('mongodb').ObjectID;
+var monCredentials = require(__dirname + '/mongocredentials'),
+    mongoCredentials = new monCredentials();
 
 module.exports = User;
 
@@ -21,232 +25,152 @@ function User()
     this.FirstName = (typeof arguments[3] !== 'undefined') ? arguments[3] : null;
     this.LastName = (typeof arguments[4] !== 'undefined') ? arguments[4] : null;
     this.EmailAddress = (typeof arguments[5] !== 'undefined') ? arguments[5] : null;
+    this.response = {
+        UserID: this.UserID,
+        Username: this.Username,
+        FirstName: this.FirstName,
+        LastName: this.LastName,
+        EmailAddress: this.EmailAddress,
+        LoggedIn: true,
+        Created: false,
+        Deleted: false
+    };
 }
 
 User.prototype = {
-    fetch: function(callback)
-    {
-        if(typeof this.UserID === 'undefined' || this.UserID === null)
-        {
-            if(typeof callback === 'function')
-            {
-                callback(false);
-            }
+    setValues: function(values) {
+        this.response.UserID = this.userID = values._id;
+        this.response.Username = this.Username = values.Username;
+        this.response.Password = this.Password = values.Password;
+        this.response.FirstName = this.FirstName = values.FirstName;
+        this.response.LastName = this.LastName = values.LastName;
+        this.response.EmailAddress = this.EmailAddress = values.EmailAddress;
+    },
+    setSafeValues: function(values) {
+        values.Password = null;
+        this.setValues(values);
+    },
+    fetch: function(callback) {
+        if((typeof this.UserID === 'undefined' || this.UserID === null) && typeof callback === 'function') {
+            callback(false);
         }
 
         var context = this;
-        var sqlQuery = 'SELECT UserID, Username, Password, FirstName, LastName, EmailAddress FROM User WHERE UserID = ?';
-        
-        var toReturn = db.query(sqlQuery, [this.UserID], function(err, result) {
-            if(err)
-            {
-                if(typeof callback === 'function')
-                {
-                    callback(false);
-                }
-            }
+        var url = mongoCredentials.getUrl();
 
-            if(result.length > 0)
-            {
-                context.UserID = result[0].UserID;
-                context.Username = result[0].Username;
-                context.Password = result[0].Password;
-                context.FirstName = result[0].FirstName;
-                context.LastName = result[0].LastName;
-                context.EmailAddress = result[0].EmailAddress;
+        var getUser = function(db, cf) {
+            // Gather the documents
+            var userCollection = db.collection('users');
+            userCollection.find({
+                "UserID": context.UserID
+            }).toArray(function(err, result) {
+                assert.equal(null, err);
+                cf(result);
+            });
+        };
 
-                if(typeof callback === 'function')
-                {
-                    callback(true);
-                }
-            }
-            else
-            {
-                if(typeof callback === 'function')
-                {
-                    callback(false);
-                }
-            }
+        mongo.connect(url, function(err, db) {
+            assert.equal(null, err);
+
+            getUser(db, function(result) {
+                db.close();
+                context.setSafeValues(result[0]);
+
+                callback(context.response);
+            });
         });
     },
-    login: function(callback)
-    {
+    login: function(callback) {
         if((typeof this.EmailAddress === 'undefined' || this.EmailAddress === null) ||
-           (typeof this.Password === 'undefined' || this.Password === null))
-        {
-            if(typeof callback === 'function')
-            {
+           (typeof this.Password === 'undefined' || this.Password === null)) {
+            if(typeof callback === 'function') {
                 callback(false);
             }
         }
 
         var context = this;
-        var sqlQuery = 'SELECT UserID, Username, Password, FirstName, LastName, EmailAddress FROM User WHERE EmailAddress = ? AND Password = ?';
+        var url = mongoCredentials.getUrl();
 
-        var toReturn = db.query(sqlQuery, [this.EmailAddress, this.Password], function(err, result) {
+        var loginUser = function(db, cf) {
+            // Gather the documents
+            var userCollection = db.collection('users');
+            userCollection.find({
+                "EmailAddress": context.EmailAddress,
+                "Password": context.Password
+            }).toArray(function(err, result) {
+                assert.equal(null, err);
+                cf(result);
+            });
+        };
 
-            if(err)
-            {
-                if(typeof callback === 'function')
-                {
-                    callback(false);
+        mongo.connect(url, function(err, db) {
+            assert.equal(null, err);
+
+            loginUser(db, function(result) {
+                db.close();
+                if (result.length > 0) {
+                    context.setSafeValues(result[0]);
+                    context.response.LoggedIn = true;
                 }
-            }
 
-            if(result.length > 0)
-            {
-                context.UserID = result[0].UserID;
-                context.Username = result[0].Username;
-                context.Password = result[0].Password;
-                context.FirstName = result[0].FirstName;
-                context.LastName = result[0].LastName;
-                context.EmailAddress = result[0].EmailAddress;
-
-                if(typeof callback === 'function')
-                {
-                    callback(true);
-                }
-            }
-            else
-            {
-                if(typeof callback === 'function')
-                {
-                    callback(false);
-                }
-            }
+                callback(context.response);
+            });
         });
     },
-    insert: function(callback)
-    {
+    insert: function(callback) {
         if((typeof this.Username === 'undefined' || this.Username === null) ||
            (typeof this.Password === 'undefined' || this.Password === null) ||
            (typeof this.FirstName === 'undefined' || this.FirstName === null) ||
            (typeof this.LastName === 'undefined' || this.LastName === null) ||
-           (typeof this.EmailAddress === 'undefined' || this.EmailAddress === null))
-        {
-            if(typeof callback === 'function')
-            {
+           (typeof this.EmailAddress === 'undefined' || this.EmailAddress === null)) {
+
+            if(typeof callback === 'function') {
                 callback(false);
             }
         }
 
         var context = this;
-        var sqlQuery = 'INSERT INTO User (Username, Password, FirstName, LastName, EmailAddress) VALUES(?, ?, ?, ?, ?)';
-        
-        var toReturn = db.query(sqlQuery, [this.Username, this.Password, this.FirstName, this.LastName, this.EmailAddress], function(err, result) {
+        var url = mongoCredentials.getUrl();
 
-            if(err)
-            {
-                if(typeof callback === 'function')
-                {
-                    callback(false);
+        var createUser = function(db, cf) {
+            // Gather the documents
+            var userCollection = db.collection('users');
+            userCollection.insert({
+                "Username": context.Username,
+                "Password": context.Password,
+                "FirstName": context.FirstName,
+                "LastName": context.LastName,
+                "EmailAddress": context.EmailAddress
+            }, function(err, result) {
+                cf(result);
+            });
+        };
+
+        mongo.connect(url, function(err, db) {
+            assert.equal(null, err);
+
+            createUser(db, function(result) {
+                db.close();
+                if (result.length > 0) {
+                    context.setSafeValues(result[0]);
+                    context.response.Created = true;
                 }
-            }
-            console.log(result);
-            if(typeof result.insertId !== 'undefined')
-            {
-                context.UserID = result.insertId;
-                if(typeof callback === 'function')
-                {
-                    callback(result.insertId);
-                }
-            }
-            else
-            {
-                if(typeof callback === 'function')
-                {
-                    callback(false);
-                }
-            }
+
+                callback(context.response);
+            });
         });
     },
-    update: function(callback)
-    {
+    update: function(callback) {
         if((typeof this.UserID === 'undefined' || this.UserID === null) ||
            (typeof this.Username === 'undefined' || this.Username === null) ||
            (typeof this.Password === 'undefined' || this.Password === null) ||
            (typeof this.FirstName === 'undefined' || this.FirstName === null) ||
            (typeof this.LastName === 'undefined' || this.LastName === null) ||
-           (typeof this.EmailAddress === 'undefined' || this.EmailAddress === null))
-        {
-            if(typeof callback === 'function')
-            {
+           (typeof this.EmailAddress === 'undefined' || this.EmailAddress === null)) {
+
+            if(typeof callback === 'function') {
                 callback(false);
             }
         }
-
-        var sqlQuery = 'UPDATE User SET Username = ?, Password = ?, FirstName = ?, LastName = ?, EmailAddress = ? WHERE UserID = ?';
-
-        var toReturn = db.query(sqlQuery, [this.Username, this.Password, this.FirstName, this.LastName, this.EmailAddress, this.UserID], function(err, result) {
-
-            if(err)
-            {
-                if(typeof callback === 'function')
-                {
-                    callback(false);
-                }
-            }
-
-            if(result.changedRows > 0)
-            {
-                if(typeof callback === 'function')
-                {
-                    callback(true);
-                }
-            }
-            else
-            {
-                if(typeof callback === 'function')
-                {
-                    callback(false);
-                }
-            }
-        });
-    },
-    delete: function(callback)
-    {
-        if(typeof this.UserID === 'undefined' || this.UserID === null)
-        {
-            if(typeof callback === 'function')
-            {
-                callback(false);
-            }
-        }
-
-        var context = this;
-        var sqlQuery =  'DELETE FROM User WHERE UserID = ?';
-
-        var toReturn = db.query(sqlQuery, [this.UserID], function(err, result) {
-
-            if(err)
-            {
-                if(typeof callback === 'function')
-                {
-                    callback(false);
-                }
-            }
-
-            if(result.affectedRows > 0)
-            {
-                context.UserID = null;
-                context.Username = null;
-                context.Password = null;
-                context.FirstName = null;
-                context.LastName = null;
-                context.EmailAddress = null;
-
-                if(typeof callback === 'function')
-                {
-                    callback(true);
-                }
-            }
-            else
-            {
-                if(typeof callback === 'function')
-                {
-                    callback(false);
-                }
-            }
-        });
     }
 };
