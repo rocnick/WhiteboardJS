@@ -31,12 +31,17 @@ var whiteboard = function() {
 
   // Configure socket and initialize board data
   this.socket = io('http://' + siteHost + ':' + sitePort);
-  
+
   // Create socket listeners
   this.socket.on('boards', function (data) {
     var boardInfo = (data !== null) ? data : [];
   });
   this.socket.on('polygons', function (data) {
+    var boardContainer = document.getElementById('board');
+    if (typeof boardContainer === 'undefined' || boardContainer === null) {
+      return false;
+    }
+
     var polygonResponse = (data !== null) ? data : [];
 
     // The polygon string to insert into the board
@@ -49,7 +54,7 @@ var whiteboard = function() {
     if (polygonResponse.BoardID == context.boardId) {
       document.getElementById('board').innerHTML = '<svg>' + polygons + '</svg>';
     }
-      
+
     // Gather the board thumbs and add the svg to the thumb
     var boardThumb = document.querySelector('div[data-board=\'' + polygonResponse.BoardID + '\']');
     boardThumb.innerHTML = '<svg width="100%" height ="100%"><g transform="scale(0.3)">' + polygons + '</g></svg>';
@@ -163,7 +168,7 @@ whiteboard.prototype = {
 
       $('#userBoards .handle').on('click', function() {
         var newWidth = 20;
-        
+
         if ($(this).parent().width() == 20)
         {
           newWidth = $(this).parent().parent().width() - $('#palette').width() -14;
@@ -187,9 +192,9 @@ whiteboard.prototype = {
     {
       if(activeThumbs[i].getAttribute('class').indexOf('activeBoard') != -1)
       {
-        activeThumbs[i].setAttribute('class', (activeThumbs[i].getAttribute('class')).replace('activeBoard', '').replace('  ', ' '));  
+        activeThumbs[i].setAttribute('class', (activeThumbs[i].getAttribute('class')).replace('activeBoard', '').replace('  ', ' '));
       }
-      
+
       if(activeThumbs[i].dataset.board == selectedBoard)
       {
         activeThumbs[i].setAttribute('class', activeThumbs[i].getAttribute('class') + ' activeBoard');
@@ -265,7 +270,7 @@ whiteboard.prototype = {
   paletteClick: function(context, e)
   {
     var activePalette = document.getElementsByClassName('active');
-    
+
     // Remove the active class from any other palette buttons
     for(var i = 0, l = activePalette.length; i < l; i++)
     {
@@ -297,7 +302,7 @@ whiteboard.prototype = {
         this.mouse.x,
         this.mouse.y
       ];
-      
+
       this.draw[this.brush].complete(this, context, e);
     }
   },
@@ -321,7 +326,7 @@ whiteboard.prototype = {
         var eleParts = lastEleId.split('-');
         nextEleNum = parseInt(eleParts[eleParts.length-1]) + 1;
       }
-      
+
       if (typeof context.boardId !== 'undefined' && context.boardId !== null) {
         eleId += context.boardId + '-';
       }
@@ -499,7 +504,7 @@ whiteboard.prototype = {
         var width = (startPoint[0] >= endPoint[0]) ? (startPoint[0] - endPoint[0]) : (endPoint[0] - startPoint[0]);
         var height = (startPoint[1] >= endPoint[1]) ? (startPoint[1] - endPoint[1]) : (endPoint[1] - startPoint[1]);
         var ele = document.getElementById(context.currentDraw);
-        
+
         // Reset the drawing positions
         context.mouse.start = context.mouse.end = [0,0];
 
@@ -561,7 +566,7 @@ whiteboard.prototype = {
         var rx = (startPoint[0] >= endPoint[0]) ? (startPoint[0] - endPoint[0]) : (endPoint[0] - startPoint[0]);
         var ry = (startPoint[1] >= endPoint[1]) ? (startPoint[1] - endPoint[1]) : (endPoint[1] - startPoint[1]);
         var ele = document.getElementById(context.currentDraw);
-        
+
         // Reset the drawing positions
         context.mouse.start = context.mouse.end = [0,0];
 
@@ -595,7 +600,7 @@ whiteboard.prototype = {
     {
       // Commit the work to the main board
       element.innerHTML = element.innerHTML;
-      
+
       if((typeof userInfo === 'undefined' || userInfo === null) || (typeof userInfo.UserID === 'undefined' || userInfo.UserID === null))
       {
         return;

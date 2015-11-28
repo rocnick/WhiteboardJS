@@ -1,6 +1,7 @@
 //  Project:   Whiteboard JS
 //  Author:    Nick Snyder
 
+var board = require('../dal/board');
 var req = null;
 var res = null;
 
@@ -11,8 +12,9 @@ function Sharing() {
   res = (typeof arguments[1] !== 'undefined') ? arguments[1] : null;
 
   this.userBoards = null;
+  this.userInfo = (typeof req.cookies.wbUser !== 'undefined') ? req.cookies.wbUser.UserID : 'undefined';
 
-  this.showPage();
+  this.getBoards(this.userInfo);
 }
 
 Sharing.prototype = {
@@ -25,6 +27,29 @@ Sharing.prototype = {
       title: 'WhiteboardJS',
       user: userInfo,
       userBoards: boardCollection
+    });
+  },
+  getBoards: function(userId) {
+    // If the user is not logged in to an account, just give them a base board to draw on
+    if(typeof userId === 'undefined' || userId === 'undefined' || userId === null) {
+      this.showIndex();
+      return;
+    }
+
+    var context = this;
+    var selector = new board({UserID: userId});
+
+    selector.fetchAll(function(result) {
+      context.userBoards = result;
+
+      if(!result || result.length === 0) {
+        selector.insert(function(result) {
+          context.userBoards = [{ _id: result.BoardID, UserID: result.UserID }];
+          context.showPage();
+        });
+      } else {
+        context.showPage();
+      }
     });
   }
 };

@@ -1,4 +1,6 @@
 extends layout
 
 block content
-  div(id='sharingContainer') I like to do stuff
+  div(id='sharingContainer' ng-init='boardInfo') Boards
+    div(class='boardShare' ng-repeat='x in boardInfo')
+      Board: {{ x }}

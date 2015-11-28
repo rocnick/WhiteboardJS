@@ -11,4 +11,8 @@ whiteboardApp.controller('wbCtrl', function($scope) {
     $scope.loggedIn = true;
     $scope.userInfo = userInfo;
   }
+
+  if (typeof boardInfo !== 'undefined' && boardInfo !== null) {
+    $scope.boardInfo = boardInfo;
+  }
 });
