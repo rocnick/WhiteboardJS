@@ -4,4 +4,9 @@ div(id='userPanel' ng-if='!loggedIn')
   a(href='/signup') Sign Up
 div(id='userPanel' ng-if='loggedIn')
   span Hi, {{userInfo.Username}}!
-  a(href='logout') Logout
+  span |
+  span
+    a(href='sharing') Sharing
+  span |
+  span
+    a(href='logout') Logout

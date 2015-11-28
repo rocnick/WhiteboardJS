@@ -22,6 +22,10 @@ function Board(data) {
 }
 
 Board.prototype = {
+    fetch: function(callback) {
+      console.log(this.BoardID);
+      callback(this.response);
+    },
     fetchAll: function(callback) {
         if (typeof this.UserID === 'undefined' || this.UserID === null) {
             if (typeof callback === 'function') {
@@ -79,8 +83,8 @@ Board.prototype = {
                 cf(result);
             });
         };
-        
-        // Use connect method to connect to the Server 
+
+        // Use connect method to connect to the Server
         mongo.connect(url, function(err, db) {
             assert.equal(null, err);
 

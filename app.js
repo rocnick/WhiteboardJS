@@ -16,6 +16,7 @@ var signup = require('./routes/signup');
 var login = require('./routes/login');
 var logout = require('./routes/logout');
 var board = require('./routes/board');
+var sharing = require('./routes/sharing');
 var connectedUsers = [];
 
 var app = express();
@@ -40,6 +41,7 @@ app.use('/', routes);
 app.use('/signup', signup);
 app.use('/login', login);
 app.use('/logout', logout);
+app.use('/sharing', sharing);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -47,8 +49,6 @@ app.use(function(req, res, next) {
     err.status = 404;
     next(err);
 });
-
-// error handlers
 
 // development error handler
 // will print stacktrace
