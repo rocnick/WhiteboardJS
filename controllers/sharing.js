@@ -32,14 +32,14 @@ Sharing.prototype = {
   getBoards: function(userId) {
     // If the user is not logged in to an account, just give them a base board to draw on
     if(typeof userId === 'undefined' || userId === 'undefined' || userId === null) {
-      this.showIndex();
+      res.redirect('/');
       return;
     }
 
     var context = this;
     var selector = new board({UserID: userId});
 
-    selector.fetchAll(function(result) {
+    selector.fetchAllWithPolygons(function(result) {
       context.userBoards = result;
 
       if(!result || result.length === 0) {

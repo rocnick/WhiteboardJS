@@ -135,6 +135,10 @@ whiteboard.prototype = {
 
       $('#userBoards').append(addBoard);
 
+      if (typeof boardInfo === 'undefined' || boardInfo === null) {
+        return false;
+      }
+
       for(var i = 0, l = boardInfo.length; i < l; i++)
       {
         var bp = document.createElement('div');

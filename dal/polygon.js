@@ -49,7 +49,7 @@ Polygon.prototype = {
 
       gatherPolygons(db, function(result) {
         db.close();
-        
+
         // Wrap the result in the result object
         context.response.Polygons = result;
 
@@ -83,7 +83,7 @@ Polygon.prototype = {
     {
       // Insert the object into the collection
       var polygonCollection = db.collection('polygons');
-      
+
       polygonCollection.update({
         "_id": context.PolygonID,
         "BoardID": context.BoardID,
@@ -103,7 +103,7 @@ Polygon.prototype = {
       });
     };
 
-    // Use connect method to connect to the Server 
+    // Use connect method to connect to the Server
     mongo.connect(url, function(err, db) {
       assert.equal(null, err);
 

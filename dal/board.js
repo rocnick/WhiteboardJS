@@ -1,10 +1,16 @@
 //  Project:   Whiteboard JS
 //  Author:    Nick Snyder
 
+// JSHint handling
+/*jshint loopfunc: true */
+
 var mongo = require('mongodb').MongoClient, assert = require('assert');
 var ObjectId = require('mongodb').ObjectID;
 var monCredentials = require(__dirname + '/mongocredentials'),
     mongoCredentials = new monCredentials();
+var polygon = require(__dirname + '/polygon');
+var workingBoards = [];
+var finishedBoards = [];
 
 module.exports = Board;
 
@@ -22,9 +28,55 @@ function Board(data) {
 }
 
 Board.prototype = {
-    fetch: function(callback) {
-      console.log(this.BoardID);
-      callback(this.response);
+    fetchAllWithPolygons: function(callback) {
+      if (typeof this.UserID === 'undefined' || this.UserID === null) {
+          if (typeof callback === 'function') {
+              callback([]);
+          }
+          return;
+      }
+
+      var context = this;
+      var url = mongoCredentials.getUrl();
+
+      var gatherBoards = function(db, cf) {
+          // Gather the documents
+          var boardCollection = db.collection('boards');
+          boardCollection.find({
+              "UserID": context.UserID
+          }).toArray(function(err, result) {
+              assert.equal(null, err);
+              cf(result);
+          });
+      };
+
+      mongo.connect(url, function(err, db) {
+          assert.equal(null, err);
+
+          gatherBoards(db, function(result) {
+              db.close();
+
+              workingBoards = result;
+              finishedBoards = [];
+
+              // We need to request the polygons per object now
+              for (var i = 0, l = workingBoards.length; i < l; i++) {
+                var currentBoard = workingBoards[i];
+
+                var selector = new polygon({
+                  "BoardID": new ObjectId(currentBoard._id).toString()
+                });
+                selector.fetch(function(response) {
+
+                  finishedBoards.push(response);
+
+                  if (finishedBoards.length == workingBoards.length) {
+                    callback(finishedBoards);
+                  }
+                });
+              }
+          });
+      });
     },
     fetchAll: function(callback) {
         if (typeof this.UserID === 'undefined' || this.UserID === null) {
