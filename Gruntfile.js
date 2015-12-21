@@ -34,6 +34,7 @@ module.exports = function(grunt)
         './app.js',
         './Gruntfile.js',
         './socketHandler.js',
+        './connectionHandler.js',
         './controllers/*.js',
         './dal/*.js',
         './public/javascripts/*.js',
@@ -44,7 +45,7 @@ module.exports = function(grunt)
         '!./public/javascripts/jquery.min.js',
         '!*.sql'
       ],
-      options: { 
+      options: {
         globals: {
           jQuery: true
         }
@@ -55,6 +56,7 @@ module.exports = function(grunt)
         files: [
           './app.js',
           './Gruntfile.js',
+          './connectionHandler.js',
           './socketHandler.js',
           './controllers/*.js',
           './dal/*.js',

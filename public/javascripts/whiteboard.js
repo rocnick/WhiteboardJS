@@ -78,6 +78,9 @@ var whiteboard = function() {
       context.finalizeDeletion(data);
     }
   });
+  this.socket.on('newConnection', function(data) {
+    console.log(data);
+  });
   context.init();
 
   // Handle resizing page both on load and whenever window resized by user
@@ -111,11 +114,11 @@ var whiteboard = function() {
 };
 
 whiteboard.prototype = {
-  init: function()
-  {
+  init: function() {
     var context = this;
 
-    if(boardInfo !== null && boardInfo.length > 0 && typeof boardInfo[0] !== 'undefined' && boardInfo[0] !== null && boardInfo[0] != 'undefined')
+    if(typeof boardInfo !== 'undefined' && boardInfo !== null && boardInfo.length > 0 &&
+       typeof boardInfo[0] !== 'undefined' && boardInfo[0] !== null && boardInfo[0] != 'undefined')
     {
       // We are going to take the first board and make it the working board
       if(typeof boardInfo[0]._id !== 'undefined' && boardInfo[0]._id !== null && boardInfo[0]._id !== 'undefined')
@@ -641,5 +644,27 @@ whiteboard.prototype = {
     catch(Exception) {}
   }
 };
+
+// For those things that need to occur after the DOM has been manipulated
+// by the dozen other things going on (e.g. Angular firing to take care of
+// elements in the view state.)
+$(document).ready(function() {
+  // Sharing page board handling
+  var boardShareContainers = document.getElementsByClassName('boardShare');
+  if (boardShareContainers.length > 0) {
+    for (var i = 0, l = boardShareContainers.length; i < l; i++) {
+      var drawingBoard = boardShareContainers[i].firstChild;
+      var retrievedPolygons = JSON.parse(drawingBoard.getAttribute('data-polygons'));
+      var polygons = '<g transform="scale(0.3)">';
+
+      for (var j = 0, m = retrievedPolygons.length; j < m; j++) {
+        polygons += retrievedPolygons[j].Polygon;
+      }
+      polygons += '</g>';
+
+      drawingBoard.innerHTML = polygons;
+    }
+  }
+});
 
 new whiteboard();

@@ -17,7 +17,6 @@ var login = require('./routes/login');
 var logout = require('./routes/logout');
 var board = require('./routes/board');
 var sharing = require('./routes/sharing');
-var connectedUsers = [];
 
 var app = express();
 
@@ -73,8 +72,18 @@ app.use(function(err, req, res, next) {
 });
 
 // Handling the socket communication
+var connections = require('./connectionHandler');
+var clients = 0;
 io.on('connection', function(socket) {
+  clients++;
+  io.sockets.emit('newConnection', clients);
+  //connections.add();
+
   var socketHandle = require('./socketHandler')(socket);
+
+  socket.on('disconnect', function() {
+    --clients;
+  });
 });
 
 var serverPort = (process.env.PORT || 1092);

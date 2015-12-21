@@ -17,8 +17,7 @@ var monCredentials = require(__dirname + '/mongocredentials'),
 
 module.exports = User;
 
-function User()
-{
+function User() {
     this.UserID = (typeof arguments[0] !== 'undefined') ? arguments[0] : null;
     this.Username = (typeof arguments[1] !== 'undefined') ? arguments[1] : null;
     this.Password = (typeof arguments[2] !== 'undefined') ? arguments[2] : null;
@@ -49,6 +48,34 @@ User.prototype = {
     setSafeValues: function(values) {
         values.Password = null;
         this.setValues(values);
+    },
+    setPublicSafeValues: function(values) {
+      values.EmailAddress = null;
+      this.setSafeValues(values);
+    },
+    fetchAll: function(callback) {
+      var context = this;
+      var url = mongoCredentials.getUrl();
+
+      var getUser = function(db, cf) {
+          // Gather the documents
+          var userCollection = db.collection('users');
+          userCollection.find().toArray(function(err, result) {
+              assert.equal(null, err);
+              cf(result);
+          });
+      };
+
+      mongo.connect(url, function(err, db) {
+          assert.equal(null, err);
+
+          getUser(db, function(result) {
+              db.close();
+              context.setPublicSafeValues(result[0]);
+
+              callback(context.response);
+          });
+      });
     },
     fetch: function(callback) {
         if((typeof this.UserID === 'undefined' || this.UserID === null) && typeof callback === 'function') {

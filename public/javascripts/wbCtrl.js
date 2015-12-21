@@ -8,11 +8,15 @@ whiteboardApp.controller('wbCtrl', function($scope) {
 
   if (typeof userInfo !== 'undefined' && userInfo !== null)
   {
-    $scope.loggedIn = true;
+    $scope.loggedIn = userInfo.LoggedIn;
     $scope.userInfo = userInfo;
   }
 
   if (typeof boardInfo !== 'undefined' && boardInfo !== null) {
     $scope.boardInfo = boardInfo;
+  }
+
+  if (typeof users !== 'undefined' && users !== null) {
+    $scope.users = users;
   }
 });

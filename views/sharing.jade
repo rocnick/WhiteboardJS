@@ -1,6 +1,9 @@
 extends layout
 
 block content
-  div(id='sharingContainer' ng-init='boardInfo') Boards
+  div(id='sharingContainer')
+    p Board Sharing
     div(class='boardShare' ng-repeat='x in boardInfo')
-      Board: {{ x }}
+      svg(class='boardThumb' data-polygons='{{x.Polygons}}' data-boardid='{{x.BoardID}}')
+      select
+        option(ng-repeat='y in users' value='{{y.UserID}}') {{y.Username}}
