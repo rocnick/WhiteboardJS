@@ -38,20 +38,23 @@ function User() {
 
 User.prototype = {
     setValues: function(values) {
-        this.response.UserID = this.userID = values._id;
-        this.response.Username = this.Username = values.Username;
-        this.response.Password = this.Password = values.Password;
-        this.response.FirstName = this.FirstName = values.FirstName;
-        this.response.LastName = this.LastName = values.LastName;
-        this.response.EmailAddress = this.EmailAddress = values.EmailAddress;
+      var safeVals = this.response;
+        this.response.UserID = this.userID = safeVals.userID = values._id;
+        this.response.Username = this.Username = safeVals.Username = values.Username;
+        this.response.Password = this.Password = safeVals.Password = values.Password;
+        this.response.FirstName = this.FirstName = safeVals.FirstName = values.FirstName;
+        this.response.LastName = this.LastName = safeVals.LastName = values.LastName;
+        this.response.EmailAddress = this.EmailAddress = safeVals.EmailAddress = values.EmailAddress;
+
+        return safeVals;
     },
     setSafeValues: function(values) {
         values.Password = null;
-        this.setValues(values);
+        return this.setValues(values);
     },
     setPublicSafeValues: function(values) {
       values.EmailAddress = null;
-      this.setSafeValues(values);
+      return this.setSafeValues(values);
     },
     fetchAll: function(callback) {
       var context = this;
@@ -60,10 +63,14 @@ User.prototype = {
       var getUser = function(db, cf) {
           // Gather the documents
           var userCollection = db.collection('users');
-          userCollection.find().toArray(function(err, result) {
-              assert.equal(null, err);
-              console.log(result);
-              cf(result);
+          userCollection.find({}, {
+            Password: 0,
+            FirstName: 0,
+            LastName: 0,
+            EmailAddress: 0
+          }).toArray(function(err, result) {
+            assert.equal(null, err);
+            cf(result);
           });
       };
 
@@ -72,9 +79,7 @@ User.prototype = {
 
           getUser(db, function(result) {
               db.close();
-              context.setPublicSafeValues(result[0]);
-
-              callback(context.response);
+              callback(result);
           });
       });
     },

@@ -37,7 +37,7 @@ Sharing.prototype = {
     var context = this;
     var selector = new user();
     selector.fetchAll(function(response) {
-      console.log(response);
+      //console.log(response);
       context.users = response;
       context.showPage();
     });
@@ -56,13 +56,11 @@ Sharing.prototype = {
       context.userBoards = result;
 
       if(!result || result.length === 0) {
-        console.log('whee');
         selector.insert(function(result) {
           context.userBoards = [{ _id: result.BoardID, UserID: result.UserID }];
           context.getUsers();
         });
       } else {
-        console.log('woo');
         context.getUsers();
       }
     });
