@@ -30,7 +30,7 @@ function User() {
         FirstName: this.FirstName,
         LastName: this.LastName,
         EmailAddress: this.EmailAddress,
-        LoggedIn: true,
+        LoggedIn: false,
         Created: false,
         Deleted: false
     };
@@ -62,6 +62,7 @@ User.prototype = {
           var userCollection = db.collection('users');
           userCollection.find().toArray(function(err, result) {
               assert.equal(null, err);
+              console.log(result);
               cf(result);
           });
       };

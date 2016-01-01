@@ -338,7 +338,8 @@ whiteboard.prototype = {
         eleId += context.boardId + '-';
       }
 
-      if (typeof userInfo.UserID !== 'undefined' && userInfo.UserID !== null) {
+      if (typeof userInfo !== 'undefined' && userInfo !== null &&
+          typeof userInfo.UserID !== 'undefined' && userInfo.UserID !== null) {
         eleId += userInfo.UserID + '-';
       }
 

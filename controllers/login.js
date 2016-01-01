@@ -27,8 +27,15 @@ function Login() {
   var checkedUser = new User(null, null, this.form.password, null, null, this.form.email);
 
   checkedUser.login(function(result) {
+    console.log(result);
     if(!result.LoggedIn) {
-      res.render('login', { title: 'WhiteboardJS' });
+      res.render('login', {
+        title: 'WhiteboardJS',
+        user: 'undefined',
+        users: 'undefined',
+        userBoards: 'undefined',
+        error: JSON.stringify({message: 'Username or password is invalid.'})
+      });
     } else {
       // Generate an expiration date
       var expirationTime = 604800000; // One week in milliseconds

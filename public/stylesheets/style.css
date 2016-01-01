@@ -51,6 +51,19 @@ header>p>a {
 div#content {
   margin: 120px 80px;
 }
+.error {
+  color: #a94442;
+  background-color: #f2dede;
+  border-color: #ebccd1;
+  padding: 15px;
+  margin: 0px auto 20px;
+  margin-left: -25%;
+  border: 1px solid transparent;
+  font-weight: 400;
+  font-size: 16px;
+  border-radius: 4px;
+  width: 400px;
+}
 
 /* User Boards */
 div#userBoards {

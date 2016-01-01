@@ -7,7 +7,13 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('signup', { title: 'WhiteboardJS' });
+  res.render('signup', {
+    title: 'WhiteboardJS',
+    user: 'undefined',
+    users: 'undefined',
+    userBoards: 'undefined',
+    error: 'undefined'
+  });
 });
 
 router.post('/', function(req, res) {

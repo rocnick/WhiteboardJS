@@ -1,7 +1,11 @@
 extends layout
 
 block content
+  script.
+    var loginError = !{error};
   form(id='login' method='post' action='')
+    div(id='loginError' class='error' ng-if='loginError != null')
+      {{loginError.message}}
     div
       label(for='email') Email:
       input(id='email' name='email' type='text' autofocus)

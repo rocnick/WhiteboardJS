@@ -19,4 +19,9 @@ whiteboardApp.controller('wbCtrl', function($scope) {
   if (typeof users !== 'undefined' && users !== null) {
     $scope.users = users;
   }
+
+  $scope.loginError = null;
+  if (typeof loginError !== 'undefined' && loginError !== null) {
+    $scope.loginError = loginError;
+  }
 });

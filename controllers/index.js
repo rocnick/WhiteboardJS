@@ -33,6 +33,7 @@ Whiteboard.prototype = {
     res.render('index', {
       title: 'WhiteboardJS',
       user: userInfo,
+      users: 'undefined', // Alter this eventually to pass in all users.
       userBoards: boardCollection
     });
   },
