@@ -14,8 +14,9 @@ function Signup() {
   this.invalid = false;
   this.errors = [];
 
+  // This is likely broken resolve in ticket WBJS-17
   if(this.form === null || this.hasEmpty() || this.isInvalid()) {
-    return errors;
+    return this.errors;
   }
 
   // Encrypt the password

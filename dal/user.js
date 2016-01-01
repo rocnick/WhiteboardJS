@@ -179,9 +179,10 @@ User.prototype = {
 
             createUser(db, function(result) {
                 db.close();
-                if (result.length > 0) {
-                    context.setSafeValues(result[0]);
+                if (result.ops.length > 0) {
+                    context.setSafeValues(result.ops[0]);
                     context.response.Created = true;
+                    context.response.LoggedIn = true;
                 }
 
                 callback(context.response);
