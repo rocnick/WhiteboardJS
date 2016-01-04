@@ -666,6 +666,7 @@ $(document).ready(function() {
       drawingBoard.innerHTML = polygons;
     }
   }
+  $('.userControl').on('click', selectSwap);
 });
 
 new whiteboard();

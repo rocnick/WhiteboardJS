@@ -130,7 +130,9 @@ Board.prototype = {
             var boardCollection = db.collection('boards');
 
             boardCollection.insert({
-                "UserID": context.UserID
+                "UserID": context.UserID,
+                "Sharing": "public",
+                "Shared": []
             }, function(err, result) {
                 cf(result);
             });

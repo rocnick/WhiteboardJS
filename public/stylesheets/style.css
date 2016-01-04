@@ -269,4 +269,24 @@ div.sharingContainer {
 .boardShare svg {
   width: 100%;
   height: 100%;
+  border: 1px solid #c4c4c4;
+}
+
+.boardShare .sharingControls {
+  margin: 10px -10px;
+}
+.boardShare .userList {
+  width: 80px;
+  height: 150px;
+  padding: 10px;
+  margin: 0px 10px;
+}
+.boardShare .userControls {
+  display: inline-block;
+  margin: 20px 0px;
+  padding-bottom: 20px;
+}
+.boardShare input[type=button] {
+  display: block;
+  margin: 20px 0px;
 }

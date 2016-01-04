@@ -38,23 +38,14 @@ function User() {
 
 User.prototype = {
     setValues: function(values) {
-      var safeVals = this.response;
-        this.response.UserID = this.userID = safeVals.userID = values._id;
-        this.response.Username = this.Username = safeVals.Username = values.Username;
-        this.response.Password = this.Password = safeVals.Password = values.Password;
-        this.response.FirstName = this.FirstName = safeVals.FirstName = values.FirstName;
-        this.response.LastName = this.LastName = safeVals.LastName = values.LastName;
-        this.response.EmailAddress = this.EmailAddress = safeVals.EmailAddress = values.EmailAddress;
+        this.response.UserID = this.userID = values._id;
+        this.response.Username = this.Username = values.Username;
+        this.response.Password = this.Password = values.Password;
+        this.response.FirstName = this.FirstName = values.FirstName;
+        this.response.LastName = this.LastName = values.LastName;
+        this.response.EmailAddress = this.EmailAddress = values.EmailAddress;
 
-        return safeVals;
-    },
-    setSafeValues: function(values) {
-        values.Password = null;
-        return this.setValues(values);
-    },
-    setPublicSafeValues: function(values) {
-      values.EmailAddress = null;
-      return this.setSafeValues(values);
+        return this.response;
     },
     fetchAll: function(callback) {
       var context = this;
@@ -96,6 +87,8 @@ User.prototype = {
             var userCollection = db.collection('users');
             userCollection.find({
                 "UserID": context.UserID
+            }, {
+              Password: 0
             }).toArray(function(err, result) {
                 assert.equal(null, err);
                 cf(result);
@@ -107,9 +100,7 @@ User.prototype = {
 
             getUser(db, function(result) {
                 db.close();
-                context.setSafeValues(result[0]);
-
-                callback(context.response);
+                callback(context.setValues(result[0]));
             });
         });
     },
@@ -130,6 +121,8 @@ User.prototype = {
             userCollection.find({
                 "EmailAddress": context.EmailAddress,
                 "Password": context.Password
+            }, {
+              Password: 0
             }).toArray(function(err, result) {
                 assert.equal(null, err);
                 cf(result);
@@ -142,7 +135,7 @@ User.prototype = {
             loginUser(db, function(result) {
                 db.close();
                 if (result.length > 0) {
-                    context.setSafeValues(result[0]);
+                    context.setValues(result[0]);
                     context.response.LoggedIn = true;
                 }
 
@@ -185,7 +178,7 @@ User.prototype = {
             createUser(db, function(result) {
                 db.close();
                 if (result.ops.length > 0) {
-                    context.setSafeValues(result.ops[0]);
+                    context.setValues(result.ops[0]);
                     context.response.Created = true;
                     context.response.LoggedIn = true;
                 }
@@ -194,7 +187,7 @@ User.prototype = {
             });
         });
     },
-    update: function(callback) {
+    update: function(callback) { // Not currently implemented
         if((typeof this.UserID === 'undefined' || this.UserID === null) ||
            (typeof this.Username === 'undefined' || this.Username === null) ||
            (typeof this.Password === 'undefined' || this.Password === null) ||

@@ -4,6 +4,8 @@ html(lang='en' ng-app='whiteboardApp')
     title= title
     link(rel='stylesheet', href='//fonts.googleapis.com/css?family=Open+Sans')
     link(rel='stylesheet', href='/stylesheets/style.css')
+
+    script(src='javascripts/jquery.min.js')
   body(ng-controller='wbCtrl')
     include header.jade
 
@@ -14,7 +16,6 @@ html(lang='en' ng-app='whiteboardApp')
       var boardInfo = !{userBoards};
       var users = !{users};
 
-    script(src='javascripts/jquery.min.js')
     script(src='javascripts/socket.io.js')
     script(src='javascripts/angular.min.js')
     script(src='javascripts/wbCtrl.js')
