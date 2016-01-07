@@ -8,6 +8,7 @@ var whiteboard = function() {
   var context = this;
 
   this.boardId = null;
+  this.boardThumb = null;
   this.brush = 'brush';
   this.mouse = {
     x: 0,
@@ -70,6 +71,10 @@ var whiteboard = function() {
       context.deleteBoardClick(this, e);
     });
     boardThumb.appendChild(del);
+
+    if (polygonResponse.BoardID == context.boardId) {
+      context.boardThumb = document.querySelector('div[data-board=\'' + context.boardId + '\'] svg g');
+    }
   });
   this.socket.on('createdBoard', function(data) {
     if (data.Created) {
@@ -215,6 +220,8 @@ whiteboard.prototype = {
     }
 
     this.boardId = selectedBoard;
+    this.boardThumb = document.querySelector('div[data-board=\'' + selectedBoard + '\'] svg g');
+    $('#userBoards .handle').click();
   },
   addCreatedBoard: function(board)
   {
@@ -254,6 +261,7 @@ whiteboard.prototype = {
 
     bp.appendChild(del);
     addBoardButton.parentNode.insertBefore(bp, addBoardButton.nextSibling);
+    $('#userBoards .handle').click();
   },
   finalizeDeletion: function(board)
   {
@@ -570,8 +578,7 @@ whiteboard.prototype = {
 
         context.draw.redraw(context, board.children[0]);
       },
-      complete: function(context, board, e)
-      {
+      complete: function(context, board, e) {
         var startPoint = context.mouse.start;
         var endPoint = [context.mouse.x, context.mouse.y];
         var rx = (startPoint[0] >= endPoint[0]) ? (startPoint[0] - endPoint[0]) : (endPoint[0] - startPoint[0]);
@@ -581,8 +588,7 @@ whiteboard.prototype = {
         // Reset the drawing positions
         context.mouse.start = context.mouse.end = [0,0];
 
-        if(rx === 0 && ry === 0)
-        {
+        if(rx === 0 && ry === 0) {
           ele.parentNode.removeChild(ele);
         }
 
@@ -592,36 +598,32 @@ whiteboard.prototype = {
       obj: true
     },
     type: {
-      act: function(context, board, e)
-      {
+      act: function(context, board, e) {
 
       },
-      begin: function(context, board, e)
-      {
+      begin: function(context, board, e) {
 
       },
-      complete: function(context, board, e)
-      {
+      complete: function(context, board, e) {
 
       },
       continuous: false,
       obj: true
     },
-    redraw: function(context, element)
-    {
-      // Commit the work to the main board
-      element.innerHTML = element.innerHTML;
+    redraw: function(context, element) {
+      // Commit the work to the main board\
+      var html = element.innerHTML;
+      element.innerHTML = html;
 
-      if((typeof userInfo === 'undefined' || userInfo === null) || (typeof userInfo.UserID === 'undefined' || userInfo.UserID === null))
-      {
+      if((typeof userInfo === 'undefined' || userInfo === null) ||
+         (typeof userInfo.UserID === 'undefined' || userInfo.UserID === null)) {
         return;
       }
 
-      context.commitPolygon(context, element);
+      context.commitPolygon(context, element, html);
     }
   },
-  commitPolygon: function(context, element)
-  {
+  commitPolygon: function(context, element, html) {
     var polygon = document.getElementById(context.currentDraw).outerHTML;
     var data = {
       "BoardID": context.boardId,
@@ -631,20 +633,20 @@ whiteboard.prototype = {
       "commit": !context.mouse.down
     };
     context.socket.emit('inboundPolygon', data);
+    if (!context.mouse.down) {
+      context.boardThumb.innerHTML = html;
+    }
   },
-  resizeWorkspace: function()
-  {
+  resizeWorkspace: function() {
     var body = document.getElementsByTagName('body')[0];
     var header = document.getElementsByTagName('header')[0];
     var board = document.getElementById('board');
     var userBoards = document.getElementById('userBoards');
     var palette = document.getElementById('palette');
 
-    try
-    {
+    try {
       palette.style.height = board.style.height = parseInt(body.offsetHeight) - parseInt(header.offsetHeight) + 'px';
-    }
-    catch(Exception) {}
+    } catch(Exception) {}
   }
 };
 
@@ -669,6 +671,7 @@ $(document).ready(function() {
     }
   }
 
+  // Event handler attachments for the sharing page.
   if (typeof selectSwap === 'function') {
     $('.userControl').on('click', selectSwap);
   }
@@ -677,4 +680,8 @@ $(document).ready(function() {
   }
 });
 
+// Binding this to the window allows us to be able to access it from
+// other scripts. Namely we want to be able to access the socket
+// connection from the sharing script so that we can send updates to
+// the board.
 window.Whiteboard = new whiteboard();

@@ -140,7 +140,7 @@ Board.prototype = {
 
             boardCollection.insert({
                 "UserID": context.UserID,
-                "Sharing": "public",
+                "Sharing": "private",
                 "Shared": []
             }, function(err, result) {
                 cf(result);
