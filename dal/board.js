@@ -17,12 +17,16 @@ module.exports = Board;
 function Board(data) {
     this.BoardID = (typeof data.BoardID !== 'undefined') ? data.BoardID : null;
     this.UserID = (typeof data.UserID !== 'undefined') ? data.UserID : null;
+    this.Shared = (typeof data.Shared !== 'undefined') ? data.Shared : [];
+    this.Sharing = (typeof data.Sharing !== 'undefined') ? data.Sharing : null;
     this.BoardCollection = null;
     this.response = {
         BoardID: this.BoardID,
         UserID: this.UserID,
+        Shared: this.Shared,
         BoardContent: this.BoardContent,
         Deleted: false,
+        Updated: false,
         Created: false
     };
 }
@@ -58,16 +62,21 @@ Board.prototype = {
 
               workingBoards = result;
               finishedBoards = [];
+              allBoards = {};
 
               // We need to request the polygons per object now
               for (var i = 0, l = workingBoards.length; i < l; i++) {
                 var currentBoard = workingBoards[i];
+                allBoards[currentBoard._id] = currentBoard;
 
                 var selector = new polygon({
                   "BoardID": new ObjectId(currentBoard._id).toString()
                 });
                 selector.fetch(function(response) {
-
+                  response.Shared = allBoards[response.BoardID].Shared;
+                  response.Sharing = allBoards[response.BoardID].Sharing;
+                  response.UserID = allBoards[response.BoardID].UserID;
+                  delete response.PolygonID;
                   finishedBoards.push(response);
 
                   if (finishedBoards.length == workingBoards.length) {
@@ -154,8 +163,7 @@ Board.prototype = {
     delete: function(callback) {
         if ((typeof this.BoardID === 'undefined' || this.BoardID === null) ||
            (typeof this.UserID === 'undefined' || this.UserID === null)) {
-            if(typeof callback === 'function')
-            {
+            if(typeof callback === 'function') {
                 callback(this.response);
             }
             return;
@@ -188,5 +196,50 @@ Board.prototype = {
                 callback(context.response);
             });
         });
+    },
+    update: function(callback) {
+      if ((typeof this.BoardID === 'undefined' || this.BoardID === null) ||
+          (typeof this.UserID === 'undefined' || this.UserID === null)) {
+
+        if (typeof callback === 'function') {
+          callback(false);
+        }
+        return;
+      }
+
+      var context = this;
+      var url = mongoCredentials.getUrl();
+
+      var updateBoard = function(db, cf) {
+        // Define the board collection
+        var boardCollection = db.collection('boards');
+
+        // The actual remove query
+        boardCollection.update({
+            "_id": new ObjectId(context.BoardID),
+            "UserID": context.UserID
+        }, {
+          "_id": new ObjectId(context.BoardID),
+          "UserID": context.UserID,
+          "Sharing": context.Sharing,
+          "Shared": context.Shared
+        }, {
+          upsert: true
+        }, function(err, result) {
+            cf(result);
+        });
+      };
+
+      // Use connect method to connect to the Server
+      mongo.connect(url, function(err, db) {
+          assert.equal(null, err);
+
+          updateBoard(db, function(result, cback) {
+              db.close();
+              context.response.Updated = true;
+
+              callback(context.response);
+          });
+      });
     }
 };

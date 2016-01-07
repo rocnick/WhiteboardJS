@@ -33,6 +33,9 @@ var whiteboard = function() {
   this.socket = io('http://' + siteHost + ':' + sitePort);
 
   // Create socket listeners
+  this.socket.on('boardUpdate', function(data) {
+    // Don't need to do anything here yet
+  });
   this.socket.on('boards', function (data) {
     var boardInfo = (data !== null) ? data : [];
   });
@@ -627,7 +630,6 @@ whiteboard.prototype = {
       "Polygon": polygon,
       "commit": !context.mouse.down
     };
-    console.dir(data);
     context.socket.emit('inboundPolygon', data);
   },
   resizeWorkspace: function()
@@ -666,7 +668,13 @@ $(document).ready(function() {
       drawingBoard.innerHTML = polygons;
     }
   }
-  $('.userControl').on('click', selectSwap);
+
+  if (typeof selectSwap === 'function') {
+    $('.userControl').on('click', selectSwap);
+  }
+  if (typeof visibilityChange === 'function') {
+    $('.visibility').on('change', visibilityChange);
+  }
 });
 
-new whiteboard();
+window.Whiteboard = new whiteboard();

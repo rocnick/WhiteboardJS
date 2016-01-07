@@ -5,16 +5,16 @@ block content
     p Board Sharing
     div(class='boardShare' ng-repeat='x in boardInfo')
       svg(class='boardThumb' data-polygons='{{x.Polygons}}' data-boardid='{{x.BoardID}}')
-      select
-        option(value='private') Private
-        option(value='protected') Protected
-        option(value='public') Public
+      select(class='visibility')
+        option(value='private' ng-selected='x.Sharing == "private"') Private
+        option(value='protected' ng-selected='x.Sharing == "protected"') Protected
+        option(value='public' ng-selected='x.Sharing == "public"') Public
       div(class='sharingControls')
         select(multiple size='5' class='userList availableUsers')
-          option(ng-repeat='y in users' value='{{y._id}}') {{y.Username}}
+          option(ng-repeat='y in x.AvailableUsers' value='{{y._id}}') {{y.Username}}
         div(class='userControls')
-          input(type='button' value='<<' class='userControl' data-to='availableUsers' data-from='sharedUsers')
           input(type='button' value='>>' class='userControl' data-to='sharedUsers' data-from='availableUsers')
+          input(type='button' value='<<' class='userControl' data-to='availableUsers' data-from='sharedUsers')
         select(multiple size='5' class='userList sharedUsers')
           option(ng-repeat='z in x.Shared' value='{{z._id}}') {{z.Username}}
-  script(src='javascripts/selectSwap.js')
+  script(src='javascripts/sharing.js')

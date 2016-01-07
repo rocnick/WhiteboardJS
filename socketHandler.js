@@ -14,9 +14,17 @@ module.exports = function(socket) {
     });
   });
 
+  // Request polygons
   socket.on('requestPolygons', function(data) {
     new polygon(data).fetch(function(results) {
       socket.emit('polygons', results);
+    });
+  });
+
+  // Save an existing board
+  socket.on('saveBoard', function(data) {
+    new board(data).update(function(result) {
+      socket.emit('boardUpdate', 'result');
     });
   });
 
