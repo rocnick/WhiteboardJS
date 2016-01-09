@@ -23,8 +23,7 @@ var whiteboard = function() {
   var siteHost = window.location.host.toString();
   var sitePort = 81;
 
-  if (siteHost.indexOf(':') !== -1)
-  {
+  if (siteHost.indexOf(':') !== -1) {
     var siteInfo = siteHost.split(':');
     siteHost = siteInfo[0];
     sitePort = parseInt(siteInfo[1]) + 1;
@@ -89,9 +88,6 @@ var whiteboard = function() {
       context.finalizeDeletion(data);
     }
   });
-  this.socket.on('newConnection', function(data) {
-    console.log(data);
-  });
   context.init();
 
   // Handle resizing page both on load and whenever window resized by user
@@ -100,8 +96,7 @@ var whiteboard = function() {
   // Attach click handlers to palette buttons
   var paletteButtons = document.getElementsByClassName('paletteButton');
 
-  for(var i = 0, l = paletteButtons.length; i < l; i++)
-  {
+  for (var i = 0, l = paletteButtons.length; i < l; i++) {
     paletteButtons[i].addEventListener('click', function(e) {
       context.paletteClick(this, e);
     }, false);
@@ -110,8 +105,7 @@ var whiteboard = function() {
   // Add the mouse cursor to the board
   var board = document.getElementById('board');
 
-  if (typeof board !== 'undefined' && board !== null)
-  {
+  if (typeof board !== 'undefined' && board !== null) {
     board.addEventListener('mousemove', function(e) {
       context.boardMouseMove(this, e);
     }, false);
@@ -128,12 +122,10 @@ whiteboard.prototype = {
   init: function() {
     var context = this;
 
-    if(typeof boardInfo !== 'undefined' && boardInfo !== null && boardInfo.length > 0 &&
-       typeof boardInfo[0] !== 'undefined' && boardInfo[0] !== null && boardInfo[0] != 'undefined')
-    {
+    if (typeof boardInfo !== 'undefined' && boardInfo !== null && boardInfo.length > 0 &&
+       typeof boardInfo[0] !== 'undefined' && boardInfo[0] !== null && boardInfo[0] != 'undefined') {
       // We are going to take the first board and make it the working board
-      if(typeof boardInfo[0]._id !== 'undefined' && boardInfo[0]._id !== null && boardInfo[0]._id !== 'undefined')
-      {
+      if (typeof boardInfo[0]._id !== 'undefined' && boardInfo[0]._id !== null && boardInfo[0]._id !== 'undefined') {
         this.boardId = boardInfo[0]._id;
       }
     }
@@ -153,8 +145,7 @@ whiteboard.prototype = {
         return false;
       }
 
-      for(var i = 0, l = boardInfo.length; i < l; i++)
-      {
+      for (var i = 0, l = boardInfo.length; i < l; i++) {
         var bp = document.createElement('div');
 
         // Create the view of the board thumbnail
@@ -173,8 +164,7 @@ whiteboard.prototype = {
         });
 
         // If this is the currently selected board, make it active
-        if(boardInfo[i]._id == context.boardId)
-        {
+        if (boardInfo[i]._id == context.boardId) {
           bp.setAttribute('class', bp.getAttribute('class') + ' activeBoard');
         }
 
@@ -187,8 +177,7 @@ whiteboard.prototype = {
       $('#userBoards .handle').on('click', function() {
         var newWidth = 20;
 
-        if ($(this).parent().width() == 20)
-        {
+        if ($(this).parent().width() == 20) {
           newWidth = $(this).parent().parent().width() - $('#palette').width() -14;
         }
 
@@ -200,21 +189,17 @@ whiteboard.prototype = {
       });
     });
   },
-  selectBoard: function(context, e)
-  {
+  selectBoard: function(context, e) {
     var selectedBoard = context.dataset.board;
     var activeThumbs = document.getElementsByClassName('boardThumb');
     var i, l;
 
-    for(i = 0, l = activeThumbs.length; i < l; i++)
-    {
-      if(activeThumbs[i].getAttribute('class').indexOf('activeBoard') != -1)
-      {
+    for (i = 0, l = activeThumbs.length; i < l; i++) {
+      if (activeThumbs[i].getAttribute('class').indexOf('activeBoard') != -1) {
         activeThumbs[i].setAttribute('class', (activeThumbs[i].getAttribute('class')).replace('activeBoard', '').replace('  ', ' '));
       }
 
-      if(activeThumbs[i].dataset.board == selectedBoard)
-      {
+      if (activeThumbs[i].dataset.board == selectedBoard) {
         activeThumbs[i].setAttribute('class', activeThumbs[i].getAttribute('class') + ' activeBoard');
         var svgContainer = activeThumbs[i].children[0];
         var svgContent = svgContainer.children[0].innerHTML;
@@ -226,8 +211,7 @@ whiteboard.prototype = {
     this.boardThumb = document.querySelector('div[data-board=\'' + selectedBoard + '\'] svg g');
     $('#userBoards .handle').click();
   },
-  addCreatedBoard: function(board)
-  {
+  addCreatedBoard: function(board) {
     context = this;
 
     var addBoardButton = document.getElementById('addBoardButton');
@@ -241,8 +225,7 @@ whiteboard.prototype = {
       context.deleteBoardClick(this, e);
     });
 
-    for(var i = 0, l = activeBoards.length; i < l; i++)
-    {
+    for (var i = 0, l = activeBoards.length; i < l; i++) {
       activeBoards[i].setAttribute('class', (activeBoards[i].getAttribute('class')).replace('activeBoard', '').replace('  ', ' '));
     }
 
@@ -266,8 +249,7 @@ whiteboard.prototype = {
     addBoardButton.parentNode.insertBefore(bp, addBoardButton.nextSibling);
     $('#userBoards .handle').click();
   },
-  finalizeDeletion: function(board)
-  {
+  finalizeDeletion: function(board) {
     var boardThumb = document.querySelector('div[data-board=\'' + board.BoardID + '\']');
     boardThumb.parentNode.removeChild(boardThumb);
 
@@ -276,25 +258,21 @@ whiteboard.prototype = {
       document.querySelector('div[data-board]').click();
     }
   },
-  deleteBoardClick: function(context, e)
-  {
+  deleteBoardClick: function(context, e) {
     // We don't want the event to bubble to the parent
     e.stopPropagation();
 
     // Go ahead and send the delete request
     this.socket.emit('deleteBoard', { "UserID": userInfo.UserID, "BoardID": context.parentNode.dataset.board });
   },
-  newBoardClick: function(context, e)
-  {
+  newBoardClick: function(context, e) {
     this.socket.emit('newBoard', { "UserID": userInfo.UserID });
   },
-  paletteClick: function(context, e)
-  {
+  paletteClick: function(context, e) {
     var activePalette = document.getElementsByClassName('active');
 
     // Remove the active class from any other palette buttons
-    for(var i = 0, l = activePalette.length; i < l; i++)
-    {
+    for (var i = 0, l = activePalette.length; i < l; i++) {
       activePalette[i].classList.remove('active');
     }
 
@@ -302,8 +280,7 @@ whiteboard.prototype = {
 
     context.classList.add('active');
   },
-  boardMouseDown: function(context, e)
-  {
+  boardMouseDown: function(context, e) {
     this.mouse.start = [
       this.mouse.x,
       this.mouse.y
@@ -313,12 +290,10 @@ whiteboard.prototype = {
 
     this.draw[this.brush].begin(this, context, e);
   },
-  boardMouseUp: function(context, e)
-  {
+  boardMouseUp: function(context, e) {
     this.mouse.down = false;
 
-    if (this.draw[this.brush].obj)
-    {
+    if (this.draw[this.brush].obj) {
       this.mouse.end = [
         this.mouse.x,
         this.mouse.y
@@ -327,13 +302,11 @@ whiteboard.prototype = {
       this.draw[this.brush].complete(this, context, e);
     }
   },
-  boardMouseMove: function(context, e)
-  {
+  boardMouseMove: function(context, e) {
     this.mouse.x = (e.clientX || e.pageX) - context.offsetLeft;
     this.mouse.y = (e.clientY || e.pageY) - context.offsetTop;
 
-    if (this.mouse.down)
-    {
+    if (this.mouse.down) {
       this.draw[this.brush].act(this, context, e);
     }
   },
@@ -360,8 +333,7 @@ whiteboard.prototype = {
       return eleId += nextEleNum;
     },
     brush: {
-      act: function(context, board, e)
-      {
+      act: function(context, board, e) {
         var ele = document.getElementById(context.currentDraw);
         var currentPoint = context.mouse.x + ',' + context.mouse.y;
         var updatedPoints = ele.getAttribute('points') + ' ' + currentPoint;
@@ -370,8 +342,7 @@ whiteboard.prototype = {
 
         context.draw.redraw(context, board.children[0]);
       },
-      begin: function(context, board, e)
-      {
+      begin: function(context, board, e) {
         var currentPoint = context.mouse.start[0] + ',' + context.mouse.start[1];
         var ele = document.createElement('polyline');
         var strokeColor = document.getElementById('drawStrokeColor').value;
@@ -392,8 +363,7 @@ whiteboard.prototype = {
 
         context.draw.redraw(context, board.children[0]);
       },
-      complete: function(context, board, e)
-      {
+      complete: function(context, board, e) {
         context.mouse.start = context.mouse.end = [0,0];
 
         context.draw.redraw(context, board.children[0]);
@@ -402,8 +372,7 @@ whiteboard.prototype = {
       obj: true
     },
     pencil: {
-      act: function(context, board, e)
-      {
+      act: function(context, board, e) {
         var ele = document.getElementById(context.currentDraw);
         var currentPoint = context.mouse.x + ',' + context.mouse.y;
         var updatedPoints = ele.getAttribute('points') + ' ' + currentPoint;
@@ -412,8 +381,7 @@ whiteboard.prototype = {
 
         context.draw.redraw(context, board.children[0]);
       },
-      begin: function(context, board, e)
-      {
+      begin: function(context, board, e) {
         var currentPoint = context.mouse.start[0] + ',' + context.mouse.start[1];
         var ele = document.createElement('polyline');
         var strokeColor = document.getElementById('drawStrokeColor').value;
@@ -434,8 +402,7 @@ whiteboard.prototype = {
 
         context.draw.redraw(context, board.children[0]);
       },
-      complete: function(context, board, e)
-      {
+      complete: function(context, board, e) {
         context.mouse.start = context.mouse.end = [0,0];
 
         context.draw.redraw(context, board.children[0]);
@@ -444,40 +411,21 @@ whiteboard.prototype = {
       obj: false
     },
     fill: {
-      act: function()
-      {
-        console.log('filling the world');
-      },
-      begin: function(context, board, e)
-      {
-
-      },
-      complete: function(context, board, e)
-      {
-
-      },
+      act: function() { },
+      begin: function(context, board, e) { },
+      complete: function(context, board, e) { },
       continuous: false,
       obj: false
     },
     eraser: {
-      act: function(context, board, e)
-      {
-        console.log('erasing your life');
-      },
-      begin: function(context, board, e)
-      {
-
-      },
-      complete: function(context, board, e)
-      {
-
-      },
+      act: function(context, board, e) { },
+      begin: function(context, board, e) { },
+      complete: function(context, board, e) { },
       continuous: true,
       obj: false
     },
     rect: {
-      act: function(context, board, e)
-      {
+      act: function(context, board, e) {
         var ele = document.getElementById(context.currentDraw);
 
         var startPoint = context.mouse.start;
@@ -493,8 +441,7 @@ whiteboard.prototype = {
 
         context.draw.redraw(context, board.children[0]);
       },
-      begin: function(context, board, e)
-      {
+      begin: function(context, board, e) {
         var startPoint = context.mouse.start;
         var ele = document.createElement('rect');
         var strokeColor = document.getElementById('drawStrokeColor').value;
@@ -519,8 +466,7 @@ whiteboard.prototype = {
 
         context.draw.redraw(context, board.children[0]);
       },
-      complete: function(context, board, e)
-      {
+      complete: function(context, board, e) {
         var startPoint = context.mouse.start;
         var endPoint = [context.mouse.x, context.mouse.y];
         var width = (startPoint[0] >= endPoint[0]) ? (startPoint[0] - endPoint[0]) : (endPoint[0] - startPoint[0]);
@@ -541,8 +487,7 @@ whiteboard.prototype = {
       obj: true
     },
     circle: {
-      act: function(context, board, e)
-      {
+      act: function(context, board, e) {
         var ele = document.getElementById(context.currentDraw);
 
         var startPoint = context.mouse.start;
@@ -555,8 +500,7 @@ whiteboard.prototype = {
 
         context.draw.redraw(context, board.children[0]);
       },
-      begin: function(context, board, e)
-      {
+      begin: function(context, board, e) {
         var startPoint = context.mouse.start;
         var ele = document.createElement('ellipse');
         var strokeColor = document.getElementById('drawStrokeColor').value;
@@ -601,15 +545,9 @@ whiteboard.prototype = {
       obj: true
     },
     type: {
-      act: function(context, board, e) {
-
-      },
-      begin: function(context, board, e) {
-
-      },
-      complete: function(context, board, e) {
-
-      },
+      act: function(context, board, e) { },
+      begin: function(context, board, e) { },
+      complete: function(context, board, e) { },
       continuous: false,
       obj: true
     },
