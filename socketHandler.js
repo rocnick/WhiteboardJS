@@ -6,7 +6,7 @@
 var board = require('./dal/board');
 var polygon = require('./dal/polygon');
 
-module.exports = function(socket) {
+module.exports = function(socket, ch) {
   // Request the boards
   socket.on('requestBoards', function(data) {
     new board(data).fetchAll(function(results) {
@@ -46,5 +46,14 @@ module.exports = function(socket) {
   socket.on('inboundPolygon', function(data) {
     if (data.commit)
       new polygon(data).upsert();
+  });
+
+  socket.on('identifyConnection', function(data) {
+    if (typeof data !== 'undefined' && data !== null) {
+      ch.identifyConnection({
+        id: socket.id,
+        userId: data
+      });
+    }
   });
 };

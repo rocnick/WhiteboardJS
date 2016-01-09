@@ -3,30 +3,75 @@
 
 /*jshint loopfunc: true */
 
-var req;
-var res;
-var connections = [];
-
 module.exports = ConnectionHandler;
 
-function ConnectionHandler() {
-  req = (typeof arguments[0] !== 'undefined' && arguments[0] !== null) ?
-    arguments[0] : null;
-  res = (typeof arguments[1] !== 'undefined' && arguments[1] !== null) ?
-    arguments[1] : null;
+function ConnectionHandler(data) {
+  if (typeof data === 'undefined' || data === null) {
+    return;
+  }
+
+  this.io = (typeof data === 'undefined' || data === null) ? null : data;
+  this.connections = [];
 }
 
 ConnectionHandler.prototype = {
-  add: function() {
-    connections.push({});
+  add: function(socket) {
+    this.connections.push({
+      userId: null,
+      id: socket.id,
+      socket: socket
+    });
   },
-  kill: function() {
+  identifyConnection: function(conn) {
+    var index = this.getConnectionIndex(this.getConnectionByField('id', conn.id));
+    if (index === null) {
+      return;
+    }
 
+    this.killPreviousConnection(conn.userId);
+
+    index = this.getConnectionIndex(this.getConnectionByField('id', conn.id));
+    this.connections[index].userId = conn.userId;
   },
-  get: function() {
-    var connectionToGet = (typeof arguments[0] !== 'undefined' && arguments[0] !== null) ?
-      arguments[0] : null;
+  killPreviousConnection: function(userId) {
+    var previousConnection = this.getConnectionByField('userId', userId);
+    if (typeof previousConnection === 'undefined' || previousConnection === null) {
+      return;
+    }
 
-    // Gather the connection from the connections array and return it
+    this.kill(previousConnection);
+  },
+  kill: function(socket) {
+    var index = this.getConnectionIndex(socket);
+    if (index !== null) {
+      this.connections.splice(index, 1);
+    }
+  },
+  getConnectionByField: function(field, value) {
+    if ((typeof field === 'undefined' || field === null) ||
+        (typeof value === 'undefined' || value === null)) {
+      return null;
+    }
+
+    for (var i = 0, l = this.connections.length; i < l; i++) {
+      if (this.connections[i][field] == value) {
+        return this.connections[i].socket;
+      }
+    }
+
+    return null;
+  },
+  getConnectionIndex: function(socket) {
+    if (typeof socket === 'undefined' || socket === null) {
+      return null;
+    }
+
+    for (var i = 0, l = this.connections.length; i < l; i++) {
+      if (this.connections[i].id == socket.id) {
+        return i;
+      }
+    }
+
+    return null;
   }
 };

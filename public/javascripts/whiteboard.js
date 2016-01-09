@@ -30,8 +30,11 @@ var whiteboard = function() {
     sitePort = parseInt(siteInfo[1]) + 1;
   }
 
-  // Configure socket and initialize board data
+  // Configure and initialize socket
   this.socket = io('http://' + siteHost + ':' + sitePort);
+  if (typeof userInfo !== 'undefined' && userInfo !== null && userInfo.LoggedIn) {
+    this.socket.emit('identifyConnection', userInfo.UserID);
+  }
 
   // Create socket listeners
   this.socket.on('boardUpdate', function(data) {

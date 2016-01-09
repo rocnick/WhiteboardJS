@@ -9,9 +9,12 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var router = express.Router();
+var ch = require('./connectionHandler');
+var connectionHandle = new ch(io);
 
 // Set up routes
-var routes = require('./routes/index');
+var index = require('./routes/index');
 var signup = require('./routes/signup');
 var login = require('./routes/login');
 var logout = require('./routes/logout');
@@ -36,7 +39,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
+app.use('/', index);
 app.use('/signup', signup);
 app.use('/login', login);
 app.use('/logout', logout);
@@ -72,17 +75,13 @@ app.use(function(err, req, res, next) {
 });
 
 // Handling the socket communication
-var connections = require('./connectionHandler');
-var clients = 0;
 io.on('connection', function(socket) {
-  clients++;
-  io.sockets.emit('newConnection', clients);
-  //connections.add();
+  connectionHandle.add(socket);
+  var socketHandle = require('./socketHandler')(socket, connectionHandle);
 
-  var socketHandle = require('./socketHandler')(socket);
-
-  socket.on('disconnect', function() {
-    --clients;
+  // Handling a socket disconnecting
+  io.on('disconnect', function(socket) {
+    ch.kill(socket);
   });
 });
 
