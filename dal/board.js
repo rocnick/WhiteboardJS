@@ -186,6 +186,38 @@ Board.prototype = {
             });
         });
     },
+    fetch: function(callback) {
+        if (typeof this.BoardID === 'undefined' || this.BoardID === null) {
+            if (typeof callback === 'function') {
+                callback([]);
+            }
+            return;
+        }
+
+        var context = this;
+        var url = mongoCredentials.getUrl();
+
+        var gatherBoards = function(db, cf) {
+            // Gather the documents
+            var boardCollection = db.collection('boards');
+            boardCollection.find({
+                "_id": new ObjectId(context.BoardID)
+            }).toArray(function(err, result) {
+                assert.equal(null, err);
+                cf(result);
+            });
+        };
+
+        mongo.connect(url, function(err, db) {
+            assert.equal(null, err);
+
+            gatherBoards(db, function(result) {
+                db.close();
+
+                callback(result);
+            });
+        });
+    },
     insert: function(callback) {
         if ((typeof this.UserID === 'undefined' || this.UserID === null)) {
             if (typeof callback === 'function') {

@@ -45,7 +45,7 @@ Whiteboard.prototype = {
       if (typeof result !== undefined && result !== null) {
         context.userBoards = context.userBoards.concat(result);
       }
-      console.log('huh...');
+
       context.showIndex();
     });
   },

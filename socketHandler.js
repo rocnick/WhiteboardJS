@@ -44,8 +44,25 @@ module.exports = function(socket, ch) {
 
   // Upsert a polygon
   socket.on('inboundPolygon', function(data) {
-    if (data.commit)
+    if (typeof data === 'undefined' || data === null) {
+      return;
+    }
+
+    // We only want to save polygons to the database
+    // if the user is completely done drawing.
+    if (data.commit) {
       new polygon(data).upsert();
+      ch.sendPolygonToWatchers(data);
+    }
+
+    // Unlike saving to the database, however,
+    // we want to send every polygon to the watching
+    // users.
+    //ch.sendPolygonToWatchers(data);
+    // Not true for now. Because transport is delayed,
+    // they arrive out of order. We must collect them,
+    // identify the correct order, and then display in
+    // that fashion.
   });
 
   socket.on('identifyConnection', function(data) {

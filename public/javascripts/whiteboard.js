@@ -20,42 +20,7 @@ var whiteboard = function() {
   this.canvas = [];
   this.currentDraw = null;
 
-  var siteHost = window.location.host.toString();
-  var sitePort = 81;
-
-  if (siteHost.indexOf(':') !== -1) {
-    var siteInfo = siteHost.split(':');
-    siteHost = siteInfo[0];
-    sitePort = parseInt(siteInfo[1]) + 1;
-  }
-
-  // Configure and initialize socket
-  this.socket = io('http://' + siteHost + ':' + sitePort);
-  if (typeof userInfo !== 'undefined' && userInfo !== null && userInfo.LoggedIn) {
-    this.socket.emit('identifyConnection', userInfo.UserID);
-  }
-
-  // Create socket listeners
-  this.socket.on('boardUpdate', function(data) {
-    // Don't need to do anything here yet
-  });
-  this.socket.on('boards', function (data) {
-    var boardInfo = (data !== null) ? data : [];
-  });
-  this.socket.on('polygons', function (data) {
-    // This will be a placeholder for polygons inbound from other users
-    console.log(data);
-  });
-  this.socket.on('createdBoard', function(data) {
-    if (data.Created) {
-      context.addCreatedBoard(data);
-    }
-  });
-  this.socket.on('deletionResponse', function(data) {
-    if (data.Deleted) {
-      context.finalizeDeletion(data);
-    }
-  });
+  this.initiateSocket();
   context.init();
 
   // Handle resizing page both on load and whenever window resized by user
@@ -87,6 +52,58 @@ var whiteboard = function() {
 };
 
 whiteboard.prototype = {
+  initiateSocket: function() {
+    if (typeof userInfo === 'undefined' || userInfo === null || !userInfo.LoggedIn) {
+      return;
+    }
+
+    var siteHost = window.location.host.toString();
+    var sitePort = 81;
+
+    if (siteHost.indexOf(':') !== -1) {
+      var siteInfo = siteHost.split(':');
+      siteHost = siteInfo[0];
+      sitePort = parseInt(siteInfo[1]) + 1;
+    }
+
+    // Initialize and configure socket settings
+    this.socket = io('http://' + siteHost + ':' + sitePort);
+    this.socket.emit('identifyConnection', userInfo.UserID);
+    this.configureSocket();
+  },
+  configureSocket: function() {
+    var context = this;
+
+    // Create socket listeners
+    this.socket.on('boardUpdate', function(data) {
+      // Don't need to do anything here yet
+    });
+    this.socket.on('boards', function (data) {
+      var boardInfo = (data !== null) ? data : [];
+    });
+    this.socket.on('polygon', function (data) {
+      // This will be a placeholder for polygons inbound from other users
+      var boardThumb = document.querySelector('div[data-board=\'' + data.BoardID + '\'] svg g');
+      boardThumb.innerHTML += data.Polygon;
+
+      if (context.boardId === data.BoardID) {
+        var board = document.getElementById('board');
+        if (typeof board !== 'undefined' && board !== null) {
+          board.children[0].innerHTML += data.Polygon;
+        }
+      }
+    });
+    this.socket.on('createdBoard', function(data) {
+      if (data.Created) {
+        context.addCreatedBoard(data);
+      }
+    });
+    this.socket.on('deletionResponse', function(data) {
+      if (data.Deleted) {
+        context.finalizeDeletion(data);
+      }
+    });
+  },
   init: function() {
     var context = this;
 
