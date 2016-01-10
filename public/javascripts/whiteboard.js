@@ -119,33 +119,47 @@ whiteboard.prototype = {
         bp.style.margin = '4px 10px';
         bp.setAttribute('class', 'boardThumb');
         bp.setAttribute('data-board', boardInfo[i].BoardID);
-
-        // Add the listener to choose this board to work on
         bp.addEventListener('click', function(e) {
           context.selectBoard(this, e);
         });
 
+        // Generate both the thumbnail and the board level SVGs
         var svgs = context.generateSvg(boardInfo[i].Polygons, true);
 
         // If this is the currently selected board, make it active
         if (boardInfo[i].BoardID == context.boardId) {
           bp.setAttribute('class', bp.getAttribute('class') + ' activeBoard');
-          document.getElementById('board').innerHTML = svgs[0];
+          var board = document.getElementById('board');
+          if (typeof board !== 'undefined' && board !== null) {
+            board.innerHTML = svgs[0];
+          }
         }
 
         bp.innerHTML = svgs[1];
 
-        // The polygons have been added to the thumbnail,
-        // now let's append the delete button also
-        var del = document.createElement('div');
-        del.setAttribute('class', 'deleteBoard');
-        del.addEventListener('click', function(e) {
-          context.deleteBoardClick(this, e);
-        });
-        bp.appendChild(del);
+        // If the board is shared from another user let's
+        // display that fact.
+        if (userInfo.UserID !== boardInfo[i].UserID) {
+          var sharedContainer = document.createElement('div');
+          sharedContainer.appendChild(document.createTextNode('Shared: ' + boardInfo[i].Username));
+          sharedContainer.setAttribute('class', 'sharedNotifier');
+          bp.appendChild(sharedContainer);
+        } else {
+          // The polygons have been added to the thumbnail,
+          // now let's append the delete button also.
+          // Note, you can only delete your own boards.
+          var del = document.createElement('div');
+          del.setAttribute('class', 'deleteBoard');
+          del.addEventListener('click', function(e) {
+            context.deleteBoardClick(this, e);
+          });
+          bp.appendChild(del);
+        }
 
         $('#userBoards').append(bp);
 
+        // Arguably this is janky at best - it's meant to allows
+        // the thumbnail to be updated when the user draws.
         if (boardInfo[i].BoardID == context.boardId) {
           context.boardThumb = document.querySelector('div[data-board=\'' + context.boardId + '\'] svg g');
         }
@@ -268,7 +282,7 @@ whiteboard.prototype = {
     this.socket.emit('deleteBoard', { "UserID": userInfo.UserID, "BoardID": context.parentNode.dataset.board });
   },
   newBoardClick: function(context, e) {
-    this.socket.emit('newBoard', { "UserID": userInfo.UserID });
+    this.socket.emit('newBoard', { "UserID": userInfo.UserID, "Username": userInfo.Username });
   },
   paletteClick: function(context, e) {
     var activePalette = document.getElementsByClassName('active');

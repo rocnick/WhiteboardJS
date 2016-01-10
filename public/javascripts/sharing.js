@@ -87,9 +87,11 @@ function eleHasClass(ele, className) {
 function prepareBoard(board, visibility, sharedUsers) {
   board.Shared = sharedUsers;
   board.Sharing = visibility;
+  board.Username = userInfo.Username;
   delete board.Polygons;
   delete board.AvailableUsers;
   delete board.$$hashKey;
+  console.log(board);
 
   return board;
 }

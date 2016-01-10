@@ -131,6 +131,14 @@ div#userBoards>div.boardThumb>div.deleteBoard {
 div#userBoards>div.boardThumb:hover>div.deleteBoard {
   display: inline-block;
 }
+div#userBoards .sharedNotifier {
+  font-size: 12px;
+  color: #FF0000;
+  font-weight: 600;
+  position: absolute;
+  left: 5px;
+  top: 5px;
+}
 
 /* Board */
 div#board {

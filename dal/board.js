@@ -17,6 +17,7 @@ module.exports = Board;
 function Board(data) {
     this.BoardID = (typeof data.BoardID !== 'undefined') ? data.BoardID : null;
     this.UserID = (typeof data.UserID !== 'undefined') ? data.UserID : null;
+    this.Username = (typeof data.Username !== 'undefined') ? data.Username : null;
     this.Shared = (typeof data.Shared !== 'undefined') ? data.Shared : [];
     this.Sharing = (typeof data.Sharing !== 'undefined') ? data.Sharing : null;
     this.BoardCollection = null;
@@ -64,6 +65,10 @@ Board.prototype = {
               finishedBoards = [];
               allBoards = {};
 
+              if (workingBoards.length === 0) {
+                callback(null);
+              }
+
               // We need to request the polygons per object now
               for (var i = 0, l = workingBoards.length; i < l; i++) {
                 var currentBoard = workingBoards[i];
@@ -76,6 +81,68 @@ Board.prototype = {
                   response.Shared = allBoards[response.BoardID].Shared;
                   response.Sharing = allBoards[response.BoardID].Sharing;
                   response.UserID = allBoards[response.BoardID].UserID;
+                  response.Username = allBoards[response.BoardID].Username;
+                  delete response.PolygonID;
+                  finishedBoards.push(response);
+
+                  if (finishedBoards.length == workingBoards.length) {
+                    callback(finishedBoards);
+                  }
+                });
+              }
+          });
+      });
+    },
+    fetchAllSharedWithPolygons: function(callback) {
+      if (typeof this.UserID === 'undefined' || this.UserID === null) {
+          if (typeof callback === 'function') {
+              callback([]);
+          }
+          return;
+      }
+
+      var context = this;
+      var url = mongoCredentials.getUrl();
+
+      var gatherBoards = function(db, cf) {
+          // Gather the documents
+          var boardCollection = db.collection('boards');
+          boardCollection.find({
+              "Shared._id": context.UserID
+          }).toArray(function(err, result) {
+              assert.equal(null, err);
+              cf(result);
+          });
+      };
+
+      mongo.connect(url, function(err, db) {
+          assert.equal(null, err);
+
+          gatherBoards(db, function(result) {
+              db.close();
+
+              workingBoards = result;
+              console.log(result);
+              finishedBoards = [];
+              allBoards = {};
+
+              if (workingBoards.length === 0) {
+                callback(null);
+              }
+
+              // We need to request the polygons per object now
+              for (var i = 0, l = workingBoards.length; i < l; i++) {
+                var currentBoard = workingBoards[i];
+                allBoards[currentBoard._id] = currentBoard;
+
+                var selector = new polygon({
+                  "BoardID": new ObjectId(currentBoard._id).toString()
+                });
+                selector.fetch(function(response) {
+                  response.Shared = allBoards[response.BoardID].Shared;
+                  response.Sharing = allBoards[response.BoardID].Sharing;
+                  response.UserID = allBoards[response.BoardID].UserID;
+                  response.Username = allBoards[response.BoardID].Username;
                   delete response.PolygonID;
                   finishedBoards.push(response);
 
@@ -140,6 +207,7 @@ Board.prototype = {
 
             boardCollection.insert({
                 "UserID": context.UserID,
+                "Username": context.Username,
                 "Sharing": "private",
                 "Shared": []
             }, function(err, result) {
@@ -220,6 +288,7 @@ Board.prototype = {
             "UserID": context.UserID
         }, {
           "_id": new ObjectId(context.BoardID),
+          "Username": context.Username,
           "UserID": context.UserID,
           "Sharing": context.Sharing,
           "Shared": context.Shared
