@@ -43,40 +43,8 @@ var whiteboard = function() {
     var boardInfo = (data !== null) ? data : [];
   });
   this.socket.on('polygons', function (data) {
-    var boardContainer = document.getElementById('board');
-    if (typeof boardContainer === 'undefined' || boardContainer === null) {
-      return false;
-    }
-
-    var polygonResponse = (data !== null) ? data : [];
-
-    // The polygon string to insert into the board
-    var polygons = '';
-
-    for (var i = 0, l = polygonResponse.Polygons.length; i < l; i++) {
-      polygons += polygonResponse.Polygons[i].Polygon;
-    }
-
-    if (polygonResponse.BoardID == context.boardId) {
-      document.getElementById('board').innerHTML = '<svg>' + polygons + '</svg>';
-    }
-
-    // Gather the board thumbs and add the svg to the thumb
-    var boardThumb = document.querySelector('div[data-board=\'' + polygonResponse.BoardID + '\']');
-    boardThumb.innerHTML = '<svg width="100%" height ="100%"><g transform="scale(0.3)">' + polygons + '</g></svg>';
-
-    // The polygons have been added to the thumbnail,
-    // now let's append the delete button also
-    var del = document.createElement('div');
-    del.setAttribute('class', 'deleteBoard');
-    del.addEventListener('click', function(e) {
-      context.deleteBoardClick(this, e);
-    });
-    boardThumb.appendChild(del);
-
-    if (polygonResponse.BoardID == context.boardId) {
-      context.boardThumb = document.querySelector('div[data-board=\'' + context.boardId + '\'] svg g');
-    }
+    // This will be a placeholder for polygons inbound from other users
+    console.log(data);
   });
   this.socket.on('createdBoard', function(data) {
     if (data.Created) {
@@ -122,23 +90,17 @@ whiteboard.prototype = {
   init: function() {
     var context = this;
 
-    if (typeof boardInfo !== 'undefined' && boardInfo !== null && boardInfo.length > 0 &&
-       typeof boardInfo[0] !== 'undefined' && boardInfo[0] !== null && boardInfo[0] != 'undefined') {
-      // We are going to take the first board and make it the working board
-      if (typeof boardInfo[0]._id !== 'undefined' && boardInfo[0]._id !== null && boardInfo[0]._id !== 'undefined') {
-        this.boardId = boardInfo[0]._id;
-      }
-    }
+    this.setWorkingBoardId();
 
     // Using jQuery here because animations
     $(document).ready(function() {
+      // Add board button
       var addBoard = document.createElement('div');
       addBoard.setAttribute('class', 'addBoard');
       addBoard.setAttribute('id', 'addBoardButton');
       addBoard.addEventListener('click', function(e) {
         context.newBoardClick(this, e);
       }, false);
-
       $('#userBoards').append(addBoard);
 
       if (typeof boardInfo === 'undefined' || boardInfo === null) {
@@ -156,22 +118,37 @@ whiteboard.prototype = {
         bp.style.borderColor = '#000';
         bp.style.margin = '4px 10px';
         bp.setAttribute('class', 'boardThumb');
-        bp.setAttribute('data-board', boardInfo[i]._id);
+        bp.setAttribute('data-board', boardInfo[i].BoardID);
 
         // Add the listener to choose this board to work on
         bp.addEventListener('click', function(e) {
           context.selectBoard(this, e);
         });
 
+        var svgs = context.generateSvg(boardInfo[i].Polygons, true);
+
         // If this is the currently selected board, make it active
-        if (boardInfo[i]._id == context.boardId) {
+        if (boardInfo[i].BoardID == context.boardId) {
           bp.setAttribute('class', bp.getAttribute('class') + ' activeBoard');
+          document.getElementById('board').innerHTML = svgs[0];
         }
 
-        // Make a request over the socket for the polygons of this board
-        context.socket.emit('requestPolygons', { BoardID: boardInfo[i]._id });
+        bp.innerHTML = svgs[1];
+
+        // The polygons have been added to the thumbnail,
+        // now let's append the delete button also
+        var del = document.createElement('div');
+        del.setAttribute('class', 'deleteBoard');
+        del.addEventListener('click', function(e) {
+          context.deleteBoardClick(this, e);
+        });
+        bp.appendChild(del);
 
         $('#userBoards').append(bp);
+
+        if (boardInfo[i].BoardID == context.boardId) {
+          context.boardThumb = document.querySelector('div[data-board=\'' + context.boardId + '\'] svg g');
+        }
       }
 
       $('#userBoards .handle').on('click', function() {
@@ -188,6 +165,31 @@ whiteboard.prototype = {
         }, 1000);
       });
     });
+  },
+  generateSvg: function(polygons) {
+    var svg = '<svg>';
+    var svgWithTransform = '<svg width="100%" height ="100%"><g transform="scale(0.3)">';
+
+    for (var i = 0, l = polygons.length; i < l; i++) {
+      svg += polygons[i].Polygon;
+      svgWithTransform += polygons[i].Polygon;
+    }
+
+    svg += '</svg>';
+    svgWithTransform += '</g></svg>';
+
+    return [svg, svgWithTransform];
+  },
+  setWorkingBoardId: function() {
+    if (typeof boardInfo !== 'undefined' && boardInfo !== null && boardInfo.length > 0 &&
+      typeof boardInfo[0] !== 'undefined' && boardInfo[0] !== null && boardInfo[0] != 'undefined') {
+      // We are going to take the first board and make it the working board
+      if (typeof boardInfo[0].BoardID !== 'undefined' &&
+          boardInfo[0].BoardID !== null &&
+          boardInfo[0].BoardID !== 'undefined') {
+        this.boardId = boardInfo[0].BoardID;
+      }
+    }
   },
   selectBoard: function(context, e) {
     var selectedBoard = context.dataset.board;
@@ -476,7 +478,7 @@ whiteboard.prototype = {
         // Reset the drawing positions
         context.mouse.start = context.mouse.end = [0,0];
 
-        if(width === 0 || height === 0)
+        if (width === 0 || height === 0)
         {
           ele.parentNode.removeChild(ele);
         }
@@ -535,7 +537,7 @@ whiteboard.prototype = {
         // Reset the drawing positions
         context.mouse.start = context.mouse.end = [0,0];
 
-        if(rx === 0 && ry === 0) {
+        if (rx === 0 && ry === 0) {
           ele.parentNode.removeChild(ele);
         }
 
@@ -556,7 +558,7 @@ whiteboard.prototype = {
       var html = element.innerHTML;
       element.innerHTML = html;
 
-      if((typeof userInfo === 'undefined' || userInfo === null) ||
+      if ((typeof userInfo === 'undefined' || userInfo === null) ||
          (typeof userInfo.UserID === 'undefined' || userInfo.UserID === null)) {
         return;
       }
