@@ -108,7 +108,8 @@ Board.prototype = {
           // Gather the documents
           var boardCollection = db.collection('boards');
           boardCollection.find({
-              "Shared._id": context.UserID
+              "Shared._id": context.UserID,
+              "Sharing" : { $ne : "private" }
           }).toArray(function(err, result) {
               assert.equal(null, err);
               cf(result);
@@ -122,7 +123,6 @@ Board.prototype = {
               db.close();
 
               workingBoards = result;
-              console.log(result);
               finishedBoards = [];
               allBoards = {};
 

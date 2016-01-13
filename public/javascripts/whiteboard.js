@@ -313,7 +313,37 @@ whiteboard.prototype = {
 
     context.classList.add('active');
   },
+  isProtected: function() {
+    if ((typeof this.boardId === 'undefined' || this.boardId === null) ||
+        (typeof userInfo === 'undefined' || userInfo === null)) {
+      return false;
+    }
+    return this.isShared() && this.getBoardById(this.boardId).Sharing === 'protected';
+  },
+  isShared: function() {
+    if (typeof this.boardId === 'undefined' || this.boardId === null) {
+      return false;
+    }
+    return this.getBoardById(this.boardId).UserID !== userInfo.UserID;
+  },
+  getBoardById: function(boardId) {
+    if (typeof boardId === 'undefined' || boardId === null) {
+      return null;
+    }
+
+    for (var i = 0, l = boardInfo.length; i < l; i++) {
+      if (boardId === boardInfo[i].BoardID) {
+        return boardInfo[i];
+      }
+    }
+
+    return null;
+  },
   boardMouseDown: function(context, e) {
+    if (this.isProtected()) {
+      return;
+    }
+
     this.mouse.start = [
       this.mouse.x,
       this.mouse.y
@@ -324,6 +354,10 @@ whiteboard.prototype = {
     this.draw[this.brush].begin(this, context, e);
   },
   boardMouseUp: function(context, e) {
+    if (this.isProtected()) {
+      return;
+    }
+
     this.mouse.down = false;
 
     if (this.draw[this.brush].obj) {
@@ -336,6 +370,10 @@ whiteboard.prototype = {
     }
   },
   boardMouseMove: function(context, e) {
+    if (this.isProtected()) {
+      return;
+    }
+
     this.mouse.x = (e.clientX || e.pageX) - context.offsetLeft;
     this.mouse.y = (e.clientY || e.pageY) - context.offsetTop;
 
