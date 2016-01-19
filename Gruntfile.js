@@ -17,6 +17,18 @@ module.exports = function(grunt)
             ]
           }
         ]
+      },
+      socketio: {
+        files: [
+          {
+            expand: true,
+            dest: './public/javascripts',
+            cwd: './node_modules/socket.io/node_modules/socket.io-client',
+            src: [
+              'socket.io.js'
+            ]
+          }
+        ]
       }
     },
     express: {

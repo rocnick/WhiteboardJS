@@ -67,7 +67,7 @@ whiteboard.prototype = {
     }
 
     // Initialize and configure socket settings
-    this.socket = io('http://' + siteHost + ':' + sitePort);
+    this.socket = io.connect('http://' + siteHost + ':' + sitePort);
     this.socket.emit('identifyConnection', userInfo.UserID);
     this.configureSocket();
   },
@@ -689,6 +689,13 @@ $(document).ready(function() {
   }
   if (typeof visibilityChange === 'function') {
     $('.visibility').on('change', visibilityChange);
+  }
+
+  // Handle unloading the socket if necessary
+  if (typeof userInfo !== 'undefined' && userInfo !== null && userInfo.LoggedIn) {
+    $(window).on('beforeunload', function() {
+      window.Whiteboard.socket.close();
+    });
   }
 });
 
